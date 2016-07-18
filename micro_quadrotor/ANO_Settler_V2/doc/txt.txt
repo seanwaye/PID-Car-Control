@@ -1,0 +1,100 @@
+//============================================================
+宏    				MCU 型号          FLASH大小
+
+STM32F10X_LD		STM32F101xx		16 ~ 32 Kbytes
+					STM32F102xx
+					STM32F103xx
+
+STM32F10X_MD		STM32F101xx		64 ~ 128 Kbytes
+					STM32F102xx
+					STM32F103xx
+
+
+STM32F10X_HD		STM32F101xx		256 ~ 512 Kbytes
+					STM32F103xx
+
+
+STM32F10X_CL		STM32F105xx		忽略
+					STM32F107xx
+
+//============================================================
+内部晶振   需要先二分频，然后再倍频，最高只能达到64M，以下是参考代码 
+
+
+//配置系统时钟为64MHZ 
+//HCLK:64MHZ 
+//PCLK2:64MHZ 
+//PCLK1：32MHZ 
+void ConfigSystemClockToHSI(void){ 
+
+RCC_DeInit();  
+    RCC_HSICmd(ENABLE);	//开启内部高速振荡器 
+while(RCC_GetFlagStatus(RCC_FLAG_HSIRDY)== RESET){//等待HSI就緒 
+} 
+
+    RCC_HCLKConfig(RCC_SYSCLK_Div1); 	//设置AHB时钟(HCLK) RCC_SYSCLK_Div1 AHB时钟等于系统时钟 
+    RCC_PCLK2Config(RCC_HCLK_Div1);  	//设置高速APB时钟(PCLK2) RCC_HCLK_Div1 APB2等于HCLK 
+    RCC_PCLK1Config(RCC_HCLK_Div2);	//设置低速APB时钟(PCLK1) RCC_HCLK_Div2 APB1等于HCLK/2 
+
+    /* Enable Prefetch Buffer */ 
+    FLASH->ACR |= FLASH_ACR_PRFTBE; 
+
+    /* Flash 2 wait state */ 
+    FLASH->ACR &= (uint32_t)((uint32_t)~FLASH_ACR_LATENCY); 
+    FLASH->ACR |= (uint32_t)FLASH_ACR_LATENCY_2;   
+
+//FLASH_SetLatency(FLASH_Latency_2);	//设置FLASH延时两个周期 
+   // FLASH_PrefetchBufferCmd(FLASH_PrefetchBuffer_Enable); //使能预取指令缓冲器 
+
+RCC_PLLConfig(RCC_PLLSource_HSI_Div2,RCC_PLLMul_16);//内部8M二分频作为PLL时钟源，PLL倍频16 PLLCLK=64MHZ 
+RCC_PLLCmd(ENABLE); 	//使能PLL时钟 
+while(RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET) ;  
+
+RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);	//选择PLLCLK为系统时钟 
+ 	while(RCC_GetSYSCLKSource() != 0x08);    	//等待PLLCLK设置为系统时钟 
+} 
+//============================================================
+GPIO寄存器描述 《STM32参考手册中文-p75》
+
+1、端口配置低寄存器(GPIOx_CRL)(x = A...E)
+2、端口配置高寄存器(GPIOx_CRH)(x = A...E)
+
+3、端口输入数据寄存器(GPIOx_IDR)(x = A...E)
+   这些位为只读并只能以字(16位)的形式读出。读出的值为对应I/O口的状态。
+   
+4、端口输出数据寄存器(GPIOx_ODR)(x = A...E)
+   只能以字(16bit)的形式操作，复位值全是0。写0即输出0，写1即输出1。
+   
+5、端口位设置/清除寄存器(GPIOx_BSRR)(x = A...E)
+   高16bit写1用于清0，低16bit写1用于置位，同时写1的话低16bi有效。
+   
+6、端口位清除寄存器(GPIOx_BRR)(x = A...E)
+   低16位写1用于置位。
+   
+7、端口配置锁定寄存器(GPIOx_LCKR)(x = A...E)
+
+GPIO八种模式
+typedef enum
+{ GPIO_Mode_AIN = 0x0,            /* 模拟输入 */   
+  GPIO_Mode_IN_FLOATING = 0x04,   /* 浮空输入，复位后的状态 */
+  GPIO_Mode_IPD = 0x28,           /* 下拉输入 */
+  GPIO_Mode_IPU = 0x48,           /* 上拉输入 */
+  GPIO_Mode_Out_OD = 0x14,        /* 开漏输出 */
+  GPIO_Mode_Out_PP = 0x10,        /* 推挽输出 */
+  GPIO_Mode_AF_OD = 0x1C,         /* 复用开漏输出 */
+  GPIO_Mode_AF_PP = 0x18          /* 复用推挽输出 */
+}GPIOMode_TypeDef;
+//==============================================================
+
+优先级分组：
+
+第0组：所有4位用于指定响应优先级
+第1组：最高1位用于指定抢占式优先级，最低3位用于指定响应优先级
+第2组：最高2位用于指定抢占式优先级，最低2位用于指定响应优先级
+第3组：最高3位用于指定抢占式优先级，最低1位用于指定响应优先级
+第4组：所有4位用于指定抢占式优先级
+
+
+
+
+//
