@@ -10,8 +10,8 @@
 void pwm_out_init()
 {
 	TIM_TimeBaseInitTypeDef		TIM_TimeBaseStructure;
-	TIM_OCInitTypeDef  				TIM_OCInitStructure;
-	GPIO_InitTypeDef GPIO_InitStructure;
+	TIM_OCInitTypeDef  				    TIM_OCInitStructure;
+	GPIO_InitTypeDef                GPIO_InitStructure;
 	
 	GPIO_StructInit(&GPIO_InitStructure);
 	TIM_TimeBaseStructInit(&TIM_TimeBaseStructure);
@@ -19,11 +19,10 @@ void pwm_out_init()
 	
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA,ENABLE);
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
-	
 	
 	uint16_t PrescalerValue = 0;
 	
@@ -57,13 +56,12 @@ void pwm_out_init()
 	
 	TIM_ARRPreloadConfig(TIM2, ENABLE);
 	TIM_Cmd(TIM2, ENABLE);
-
 }
 
 void motor_out(s16 pwm[MOTOR_NUM])
 {
 	u8 i;
-	for(i=0;i<MOTOR_NUM;i++)
+	for(i = 0;i < MOTOR_NUM;i++)
 	{
 		pwm[i] = LIMIT(pwm[i],0,1000);
 	}
@@ -72,7 +70,6 @@ void motor_out(s16 pwm[MOTOR_NUM])
 	TIM2->CCR2 = (u16)pwm[1] ;	
 	TIM2->CCR3 = (u16)pwm[2] ; 
 	TIM2->CCR4 = (u16)pwm[3] ;
-
 }
 
 /******************* (C) COPYRIGHT 2016 ANO TECH *****END OF FILE************/

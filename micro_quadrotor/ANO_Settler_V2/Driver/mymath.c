@@ -365,12 +365,8 @@ double my_norm_3(double x,double y,double z)
 
 float second_degree(float in ,float max,float first_p)
 {
-	if(first_p>0 && first_p<1 && max!= 0)
-	{
+	if(first_p > 0 && first_p < 1 && max != 0)
 		return ( in *(first_p + (1.0f - first_p) *(ABS(in)/max)) );
-	}
 	else
-	{
 		return 0;
-	}
 }

@@ -36,18 +36,14 @@ void sys_init()
 	NRF_ENABLE = ANO_NRF_Check();
 	//如果连接正常，则将NRF初始化为TX2模式（高级发送）
 	if(NRF_ENABLE)
-	{
 		ANO_NRF_Init(MODEL_TX2,80);
-	}
 	
 	#ifdef ANO_DT_USE_WIFI
 	ANO_UART3_Init(500000);
 	#endif
 	
 	Delay_ms(100);
-	
 	MPU6050_Init(20);
-	
 	Delay_ms(200);
 	
 	//参数初始化

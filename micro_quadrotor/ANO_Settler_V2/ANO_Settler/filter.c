@@ -190,6 +190,4 @@ void vec_3d_transition(_xyz_f_st *ref, _xyz_f_st *in, _xyz_f_st *out)
 			out->z = in->x *vec_3d_ref_z.x + in->y *vec_3d_ref_z.y + in->z *vec_3d_ref_z.z;
 }
 
-
-
 /******************* (C) COPYRIGHT 2016 ANO TECH *****END OF FILE************/

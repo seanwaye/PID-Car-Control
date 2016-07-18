@@ -1,7 +1,7 @@
-/************************* (C) COPYRIGHT 2016  ******************************
- * 文件名  ：ANO_Scheduler.cpp
- * 描述    ：主函数
-************************************************************************************/
+/******************************  (C) COPYRIGHT 2016  ***********************************
+ * 文件名  ：ANO_CTRL.cpp
+ * 描述    ：串级PID控制函数
+***********************************************************************************************/
 #include "ANO_CTRL.h"
 #include "ANO_IMU.h"
 #include "ANO_Drv_MPU6050.h"
@@ -10,30 +10,34 @@
 #include "ANO_RC.h"
 #include "ANO_Data.h"
 
-//角度环参数
-PID_arg_t arg_2_rol ;
-PID_arg_t arg_2_pit ;
-PID_arg_t arg_2_yaw ;
-//角速度环参数
+// 角度环参数
+PID_arg_t arg_2_rol ;    // 横滚
+PID_arg_t arg_2_pit ;    // 俯仰
+PID_arg_t arg_2_yaw ;  // 偏航
+// 角速度环参数
 PID_arg_t arg_1_rol ;
 PID_arg_t arg_1_pit ;
 PID_arg_t arg_1_yaw ;
 //PID_arg_t arg_1_yaw_comp;//compensatory
 
+// 油门环
 PID_arg_t arg_0_hs ;
 
-
+// 外环（角度）
 PID_val_t val_2_rol;
 PID_val_t val_2_pit;
 PID_val_t val_2_yaw;
 
+// 内环（角速度）
 PID_val_t val_1_rol;
 PID_val_t val_1_pit;
 PID_val_t val_1_yaw;
 //PID_val_t val_1_yaw_comp;//compensatory
 
-PID_val_t val_0_hs;
+// 油门环
+PID_val_t val_0_hs; 
 
+// ANO_Param 是在 FLASH 里面储存的参数
 void CTRL_2_PID_Init()
 {
 	arg_2_rol.kp = 0.8f   *ANO_Param.PID_rol.kp *0.001f;
@@ -54,6 +58,7 @@ void CTRL_2_PID_Init()
 	arg_2_yaw.k_pre_d = 0.0f;
 	arg_2_yaw.k_ff = 0.0f;		
 }
+
 void CTRL_1_PID_Init()
 {
 	arg_1_rol.kp = 2.0f   *ANO_Param.PID_rol_s.kp *0.001f;
@@ -73,8 +78,8 @@ void CTRL_1_PID_Init()
 	arg_1_yaw.kd = 0.0f   ;
 	arg_1_yaw.k_pre_d = 0.06f *ANO_Param.PID_yaw_s.kd *0.001f;
 	arg_1_yaw.k_ff = 0.01f;	
-	
 }
+
 void CTRL_0_PID_Init()
 {
 	arg_0_hs.kp = 1.0f *ANO_Param.PID_hs.kp *0.001f;
@@ -82,9 +87,9 @@ void CTRL_0_PID_Init()
 	arg_0_hs.kd = 0.0f;
 	arg_0_hs.k_pre_d = 0.0f *ANO_Param.PID_hs.kd *0.001f;
 	arg_0_hs.k_ff = 1.0f;
-	
 }
 
+// 所有的PID的参数的初始化
 void pid_init(void)
 {
 	CTRL_2_PID_Init();
@@ -94,39 +99,36 @@ void pid_init(void)
 
 void CTRL_2(float dT,float weight,_copter_ctrl_st *data) //角度环
 {
-	PID_calculate(  dT,            			//周期
-					0,						//前馈
-					data->exp_rol,			//期望值（设定值）
-					data->fb_rol,			//反馈值
-					&arg_2_rol, 			//PID参数结构体
-					&val_2_rol,				//PID数据结构体
-					CTRL_2_INTER_LIMIT *weight,			//integral limit，积分限幅
-					&(data->out_rol)  );	//输出
+	PID_calculate(  dT,          //周期
+					0,						               //前馈
+					data->exp_rol,			   //期望值（设定值）
+					data->fb_rol,			     //反馈值
+					&arg_2_rol, 			     //PID参数结构体
+					&val_2_rol,				     //PID数据结构体
+					CTRL_2_INTER_LIMIT *weight,			       //integral limit，积分限幅
+					&(data->out_rol)  ); 	//输出
 	
 	PID_calculate(  dT,            			//周期
-					0,						//前馈
-					data->exp_pit,			//期望值（设定值）
-					data->fb_pit,			//反馈值
-					&arg_2_pit, 			//PID参数结构体
-					&val_2_pit,				//PID数据结构体
-					CTRL_2_INTER_LIMIT *weight,			//integral limit，积分限幅
-					&(data->out_pit)  );	//输出
+					0,					                         	//前馈
+					data->exp_pit,			            //期望值（设定值）
+					data->fb_pit,		              	//反馈值
+					&arg_2_pit, 			              //PID参数结构体
+					&val_2_pit,				              //PID数据结构体
+					CTRL_2_INTER_LIMIT *weight,			       //integral limit，积分限幅
+					&(data->out_pit)  );	          //输出
 	
  	PID_calculate(  dT,            			//周期
- 					0,						//前馈
- 					data->exp_yaw,			//期望值（设定值）
- 					data->fb_yaw,			//反馈值
- 					&arg_2_yaw, 			//PID参数结构体
- 					&val_2_yaw,				//PID数据结构体
+ 					0,						                        //前馈
+ 					data->exp_yaw,			          //期望值（设定值）
+ 					data->fb_yaw,			            //反馈值
+ 					&arg_2_yaw, 			             //PID参数结构体
+ 					&val_2_yaw,				             //PID数据结构体
  					CTRL_2_INTER_LIMIT *weight,						//integral limit，积分限幅
- 					&(data->out_yaw)  );	//输出
-
+ 					&(data->out_yaw)  );	       //输出
 }
 
-
-void CTRL_1(float dT,float weight,_copter_ctrl_st *data) //角速率环
+void CTRL_1(float dT,float weight,_copter_ctrl_st *data) //角速度环
 {
-	
 	PID_calculate(  dT,            			//周期
 					data->exp_rol,			//前馈
 					data->exp_rol,			//期望值（设定值）
@@ -153,24 +155,20 @@ void CTRL_1(float dT,float weight,_copter_ctrl_st *data) //角速率环
 					&val_1_yaw,				//PID数据结构体
 					2 *CTRL_1_INTER_LIMIT *weight,		//integral limit，积分限幅
 					&(data->out_yaw) );			//输出
-						
 }
 
-
-
-void CTRL_0(float dT,float weight,float thr,float exp,float fb,float *out)
+void CTRL_0(float dT,float weight,float thr,float exp,float fb,float *out)  // 油门环
 {
 	PID_calculate(	dT,            		//周期
-					thr,				//前馈
-					exp,				//期望值（设定值）
-					fb,					//反馈值
-					&arg_0_hs, 			//PID参数结构体
-					&val_0_hs,			//PID数据结构体
-					0,					//integration limit，积分限幅
-					out  );				//输出&(*out)
+					thr,				                      //前馈
+					exp,				                    //期望值（设定值）
+					fb,					                    //反馈值
+					&arg_0_hs, 			          //PID参数结构体
+					&val_0_hs,			            //PID数据结构体
+					0,					                      //integration limit，积分限幅
+					out  );				                  //输出&(*out)
 	
 	//*out = *out *weight;
-
 }
 /*=====================================================================================================================
 						CH_N  1横滚，2俯仰，3油门，4航向 范围：+-500
@@ -186,7 +184,7 @@ float thr,thr_value,exp_hspeed,exp_hspeed_lpf;
 float out_rol_curve,out_pit_curve,out_yaw_curve;
 float est_rol,est_pit,est_yaw;
 
-void CTRL_Duty(float ch1,float ch2,float ch3,float ch4)//2ms
+void CTRL_Duty(float ch1,float ch2,float ch3,float ch4)  // 2ms 调用
 {
 	static u8 ctrl_2_cnt;
 	float dT;
@@ -198,22 +196,16 @@ void CTRL_Duty(float ch1,float ch2,float ch3,float ch4)//2ms
 	if(!flag.thr_low)//油门非低
 	{
 		if(gf.out_weight_slow<1)
-		{
-			gf.out_weight_slow += 1.5f *0.002f;//
-		}
+			gf.out_weight_slow += 1.5f *0.002f;
 		else
-		{
 			gf.out_weight_slow = 1;
-		}
 	}
 	else
-	{
 		gf.out_weight_slow = 0 ;
-	}
 	
-/*=====================================================================================================================
+/*========================================================================
 						角度环
-=====================================================================================================================*/	
+=========================================================================*/	
 	ctrl_2_cnt++;
 	ctrl_2_cnt%=3;
 	
@@ -238,9 +230,9 @@ void CTRL_Duty(float ch1,float ch2,float ch3,float ch4)//2ms
 		
 		ctrl_2_time = GetSysTime_us();
 	}
-/*=====================================================================================================================
+/*=========================================================================
 						角速度环
-=====================================================================================================================*/	
+==========================================================================*/	
 	//周期
 	dT = 0.000001f *(GetSysTime_us() - ctrl_1_time);
 	//期望角速度
@@ -267,9 +259,6 @@ void CTRL_Duty(float ch1,float ch2,float ch3,float ch4)//2ms
 	ctrl_1.fb_pit = -sensor.Gyro_deg.y;
 	ctrl_1.fb_yaw = -sensor.Gyro_deg.z;
 	
-	
-
-	
 	//角速度环控制
 	CTRL_1(dT,gf.out_weight_slow,&ctrl_1); //角速度环
 	//输出限幅
@@ -280,32 +269,27 @@ void CTRL_Duty(float ch1,float ch2,float ch3,float ch4)//2ms
 	
 	ctrl_1_time = GetSysTime_us();
 	
-/*=====================================================================================================================
+/*==========================================================================
 						油门环
-=====================================================================================================================*/	
+===========================================================================*/	
 	//周期
 	dT = 0.000001f *(GetSysTime_us() - ctrl_0_time);
 	
 	//期望速度
-	if(ch3>0)
-	{
+	if(ch3 > 0)
 		exp_hspeed = 0.002f *(+ch3) *MAX_ZSPEED_UP;
-	}
 	else
-	{
 		exp_hspeed = 0.002f *(+ch3) *MAX_ZSPEED_DN;
-	}
 	
 	//模拟反馈
 	LPF_1(5,dT,exp_hspeed,&exp_hspeed_lpf);
 	
 	//油门值
 	thr = (+ch3) + 500;	
+	
 	//油门控制
 	CTRL_0(dT,gf.out_weight,thr,exp_hspeed,exp_hspeed_lpf,&thr_value);
-	
 	thr_value = LIMIT(thr_value,0,800);//油门限制最大80%
-	
 	ctrl_0_time = GetSysTime_us();
 	
 /*=====================================================================================================================
@@ -316,50 +300,43 @@ void CTRL_Duty(float ch1,float ch2,float ch3,float ch4)//2ms
 	out_pit_curve = second_degree(ctrl_1.out_pit ,1000,0.55);
 	out_yaw_curve = second_degree(ctrl_1.out_yaw ,1000,0.55);
 	
+	// 电机PWM控制
 	motor_ctrl(0.002f,(s16)out_rol_curve,(s16)out_pit_curve,(s16)out_yaw_curve,(s16)thr_value);
 }
 
-
 /*
       机头
-   m2     m1
-     \   /
-      \ /
-      / \
-     /   \
-   m3     m4
+		 m2  m1
+			 \   /
+				\ /
+				/ \
+			 /   \
+		 m3  m4
       屁股
 */
 s16 motor[MOTOR_NUM];
 void motor_ctrl(float dT,s16 ct_val_rol,s16 ct_val_pit,s16 ct_val_yaw,s16 ct_val_thr)
 {
 	u8 i;
+	// 四个电机分别对应不同的角度计算方式
 	motor[m1] = ct_val_thr -ct_val_rol +ct_val_pit +ct_val_yaw;
 	motor[m2] = ct_val_thr +ct_val_rol +ct_val_pit -ct_val_yaw;
 	motor[m3] = ct_val_thr +ct_val_rol -ct_val_pit +ct_val_yaw;
 	motor[m4] = ct_val_thr -ct_val_rol -ct_val_pit -ct_val_yaw;
 	
-	for(i=0;i<MOTOR_NUM;i++)
+	for(i = 0;i < MOTOR_NUM;i++)
 	{
 		if(fly_ready)
 		{
 			if(flag.thr_low == 1)
-			{
 				motor[i] = LIMIT(motor[i],0,100);
-			}
 			else
-			{
 				motor[i] = LIMIT(motor[i],100,1000);
-			}
 		}
 		else
-		{
 			motor[i] = 0;
-		}
-		
 	}
-	motor_out(motor);
-	
+	motor_out(motor); // 操作定时器影响PWM
 }
 
 /******************* (C) COPYRIGHT 2016 ANO TECH *****END OF FILE************/
