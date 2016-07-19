@@ -295,7 +295,6 @@ void CTRL_Duty(float ch1,float ch2,float ch3,float ch4)  // 2ms 调用
 /*=====================================================================================================================
 						控制量输出
 =====================================================================================================================*/	
-
 	out_rol_curve = second_degree(ctrl_1.out_rol ,1000,0.55);
 	out_pit_curve = second_degree(ctrl_1.out_pit ,1000,0.55);
 	out_yaw_curve = second_degree(ctrl_1.out_yaw ,1000,0.55);
@@ -305,14 +304,14 @@ void CTRL_Duty(float ch1,float ch2,float ch3,float ch4)  // 2ms 调用
 }
 
 /*
-      机头
-		 m2  m1
-			 \   /
-				\ /
-				/ \
-			 /   \
-		 m3  m4
-      屁股
+          机头
+		     m2  m1
+	    		 \   /
+	    			\ /
+		    		/ \
+		    	 /   \
+	    	 m3  m4
+          屁股
 */
 s16 motor[MOTOR_NUM];
 void motor_ctrl(float dT,s16 ct_val_rol,s16 ct_val_pit,s16 ct_val_yaw,s16 ct_val_thr)
@@ -336,7 +335,7 @@ void motor_ctrl(float dT,s16 ct_val_rol,s16 ct_val_pit,s16 ct_val_yaw,s16 ct_val
 		else
 			motor[i] = 0;
 	}
-	motor_out(motor); // 操作定时器影响PWM
+	motor_out(motor); // 操作定时器影响PWM输出
 }
 
 /******************* (C) COPYRIGHT 2016 ANO TECH *****END OF FILE************/

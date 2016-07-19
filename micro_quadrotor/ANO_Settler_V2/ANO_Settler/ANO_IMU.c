@@ -20,16 +20,16 @@ _lf_t err_lf_z;
 
 _xyz_f_st vec_err_i;
 
-void IMU_update(float dT,_xyz_f_st *gyr, _xyz_f_st *acc,_imu_st *imu)
+void IMU_update(float dT, _xyz_f_st *gyr, _xyz_f_st *acc, _imu_st *imu)
 {
 	float kp = 0.6,ki = 0;
 	
 	float q0q1,q0q2,q1q1,q1q3,q2q2,q2q3,q3q3,q1q2,q0q3;//q0q0,
-	float w_q,x_q,y_q,z_q;
-	float acc_length,q_length;
-	_xyz_f_st acc_norm;
-	_xyz_f_st vec_err;
-	_xyz_f_st d_angle;
+	float w_q, x_q, y_q, z_q;
+	float acc_length, q_length;
+	_xyz_f_st  acc_norm;
+	_xyz_f_st  vec_err;
+	_xyz_f_st  d_angle;
 	 
     w_q = imu->w;
     x_q = imu->x;
@@ -93,7 +93,7 @@ void IMU_update(float dT,_xyz_f_st *gyr, _xyz_f_st *acc,_imu_st *imu)
     d_angle.y = (gyr->y *RAD_PER_DEG + (err_lf_y.out + vec_err_i.y) * kp) * dT / 2 ;
     d_angle.z = (gyr->z *RAD_PER_DEG + (err_lf_z.out + vec_err_i.z) * kp) * dT / 2 ;
     
-    // 计算姿态。
+    // 计算姿态（四元数）
     imu->w = w_q                -  x_q*d_angle.x  -  y_q*d_angle.y -  z_q*d_angle.z;
     imu->x = w_q*d_angle.x + x_q                 + y_q*d_angle.z  - z_q*d_angle.y;
     imu->y = w_q*d_angle.y -  x_q*d_angle.z  + y_q                + z_q*d_angle.x;
@@ -104,7 +104,8 @@ void IMU_update(float dT,_xyz_f_st *gyr, _xyz_f_st *acc,_imu_st *imu)
     imu->x /= q_length;
     imu->y /= q_length;
     imu->z /= q_length;
-	
+		
+		// 计算出欧拉角
 		imu->pit =    asin         (2*q1q3  - 2*q0q2)                              *57.30f;
 		imu->rol =    fast_atan2(2*q2q3 + 2*q0q1, -2*q1q1-2*q2q2 + 1)*57.30f; 
 		imu->yaw = -fast_atan2(2*q1q2 + 2*q0q3, -2*q2q2-2*q3q3 + 1)*57.30f; 

@@ -7,8 +7,8 @@
 struct param{
 	uint16_t FirstInitFlag;
 	uint16_t StickCal_Rol;
-	uint16_t StickCal_Pit;
-	uint16_t StickCal_Thr;
+	uint16_t StickCal_Pit;    
+	uint16_t StickCal_Thr;    // смце
 	uint16_t StickCal_Yaw;
 };
 extern struct param ANO_Param;

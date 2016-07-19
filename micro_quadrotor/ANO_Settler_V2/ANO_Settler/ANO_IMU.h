@@ -8,6 +8,7 @@
 
 typedef struct
 {
+	// 四元数
 	float w;//q0;
 	float x;//q1;
 	float y;//q2;
@@ -20,10 +21,12 @@ typedef struct
 	_xyz_f_st a_acc;
 	_xyz_f_st w_acc;
 	
+	// 欧拉角
 	float rol;
 	float pit;
 	float yaw;
 } _imu_st ;
+
 extern _imu_st imu_data;
 
 void IMU_duty(float);

@@ -19,9 +19,7 @@ void PID_calculate( float T,            //周期（单位：秒）
 	pid_val->err_i += (pid_arg->ki *pid_val->err + INNER_INTEGRAL *pid_val->feedback_d)*T;
 	
 	if(INTEGRAL_LIMIT_EN)
-	{
 		pid_val->err_i = LIMIT(pid_val->err_i,-inte_lim,inte_lim);
-	}
 	
 	*out = pid_arg->k_ff *in_ff + pid_val->err + pid_val->err_d + pid_val->feedback_d + pid_val->err_i;
 	
@@ -30,5 +28,3 @@ void PID_calculate( float T,            //周期（单位：秒）
 }
 
 /******************* (C) COPYRIGHT 2016 ANO TECH *****END OF FILE************/
-
-
