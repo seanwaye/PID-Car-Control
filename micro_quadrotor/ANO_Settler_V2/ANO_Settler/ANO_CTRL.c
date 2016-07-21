@@ -191,11 +191,11 @@ void CTRL_Duty(float ch1,float ch2,float ch3,float ch4)  // 2ms 调用
 	
 	//判断是否输出
 	flag.landed = flag.thr_low;  //临时简单处理
-	gf.out_weight = (flag.landed==1)?0:1;
+	gf.out_weight = (flag.landed == 1) ? 0 : 1;
 	
 	if(!flag.thr_low)//油门非低
 	{
-		if(gf.out_weight_slow<1)
+		if(gf.out_weight_slow < 1)
 			gf.out_weight_slow += 1.5f *0.002f;
 		else
 			gf.out_weight_slow = 1;

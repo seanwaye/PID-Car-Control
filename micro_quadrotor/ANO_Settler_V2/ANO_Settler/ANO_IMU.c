@@ -105,7 +105,7 @@ void IMU_update(float dT, _xyz_f_st *gyr, _xyz_f_st *acc, _imu_st *imu)
     imu->y /= q_length;
     imu->z /= q_length;
 		
-		// 计算出欧拉角
+		// 计算出欧拉角，用于PID系统
 		imu->pit =    asin         (2*q1q3  - 2*q0q2)                              *57.30f;
 		imu->rol =    fast_atan2(2*q2q3 + 2*q0q1, -2*q1q1-2*q2q2 + 1)*57.30f; 
 		imu->yaw = -fast_atan2(2*q1q2 + 2*q0q3, -2*q2q2-2*q3q3 + 1)*57.30f; 

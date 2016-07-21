@@ -4,10 +4,11 @@
 *******************************************************************************/
 #include "filter.h"
 
+// 限幅滤波函数
 void limit_filter(float T,float hz,_lf_t *data,float in)
 {
 	float abs_t;
-	LPF_1(hz,T,	 in,&(data->lpf_1)); 
+	LPF_1(hz,T, in,&(data->lpf_1)); 
 	abs_t = ABS(data->lpf_1);
 	data->out = LIMIT(in,-abs_t,abs_t);
 }
@@ -16,99 +17,94 @@ void limit_filter(float T,float hz,_lf_t *data,float in)
 // #define STEEPEST_STEP 10  //次
 
 // 梯度下降拟合算法
-void steepest_descend(s32 arr[],u8 len,_steepest_st *steepest,u8 step_num,s32 in)
+void steepest_descend(s32 arr[], u8 len, _steepest_st *steepest, u8 step_num, s32 in)
 {	
-	u8 updw = 1;//0 dw,1up
-	s16 i;
-	u8 step_cnt=0;
-	u8 step_slope_factor=1;
-	u8 on = 1;
-	s8 pn = 1;
-	//float last = 0;
-	float step = 0;
-	s32 start_point = 0;
-	s32 pow_sum = 0;
-	
-	steepest->lst_out = steepest->now_out;
-	
-	if( ++(steepest->cnt) >= len )	
-		(steepest->cnt) = 0; //now
-	
-	//last = arr[ (steepest->cnt) ];
-	
-	arr[ (steepest->cnt) ] = in;
-	step = (float)(in - steepest->lst_out)/step_num ;//梯度
-	
-	if(ABS(step)<1)//整形数据<1的有效判定
-	{
-		if(ABS(step)*step_num<2)
-			step = 0;
-		else
-		  step = (step > 0) ? 1 : -1;
-	}
-	
-	start_point = steepest->lst_out;
-	do
-	{
-		//start_point = steepest->lst_out;
-		for(i = 0;i < len;i++)
-			pow_sum += my_pow(arr[i] - start_point );// /step_num;//除法减小比例**
-
-		if(pow_sum - steepest->lst_pow_sum  > 0)
-		{		
-			if(updw == 0)
-				on = 0;
-			updw = 1;//上升了
-			pn = (pn == 1 ) ? -1 : 1;
-		}
-		else
-		{
-			updw = 0; //正在下降
- 			if(step_slope_factor<step_num)
- 				step_slope_factor++;
-		}
-			
-		steepest->lst_pow_sum = pow_sum;		
-		pow_sum = 0;
-		start_point += pn *step;//调整
+		u8 updw = 1;//0 dw,1up
+		s16 i;
+		u8 step_cnt = 0;
+		u8 step_slope_factor = 1;
+		u8 on = 1;
+		s8 pn = 1;
+		//float last = 0;
+		float step = 0;
+		s32 start_point = 0;
+		s32 pow_sum = 0;
 		
-		if(++step_cnt > step_num)//限制计算次数
-			on = 0;
-			//////
-		if(step_slope_factor>=2) //限制下降次数1次，节省时间，但会增大滞后，若cpu时间充裕可不用。
-			on = 0;
-			//////
-	} while(on == 1);
-	
-	steepest->now_out = start_point ;//0.5f *(start_point + steepest->lst_out);//
-	steepest->now_velocity_xdt = steepest->now_out - steepest->lst_out;
+		steepest->lst_out = steepest->now_out;
+		
+		if( ++(steepest->cnt) >= len )	
+			(steepest->cnt) = 0; //now
+		
+		//last = arr[ (steepest->cnt) ];
+		
+		arr[ (steepest->cnt) ] = in;
+		step = (float)(in - steepest->lst_out)/step_num ;//梯度
+		
+		if(ABS(step)<1)//整形数据<1的有效判定
+		{
+			if(ABS(step)*step_num<2)
+				step = 0;
+			else
+				step = (step > 0) ? 1 : -1;
+		}
+		
+		start_point = steepest->lst_out;
+		do
+		{
+			//start_point = steepest->lst_out;
+			for(i = 0;i < len;i++)
+				pow_sum += my_pow(arr[i] - start_point );// /step_num;//除法减小比例**
+
+			if(pow_sum - steepest->lst_pow_sum  > 0)
+			{		
+				if(updw == 0)
+					on = 0;
+				updw = 1;//上升了
+				pn = (pn == 1 ) ? -1 : 1;
+			}
+			else
+			{
+				updw = 0; //正在下降
+				if(step_slope_factor < step_num)
+					step_slope_factor++;
+			}
+				
+			steepest->lst_pow_sum = pow_sum;		
+			pow_sum = 0;
+			start_point += pn *step;//调整
+			
+			if(++step_cnt > step_num)//限制计算次数
+				on = 0;
+			if(step_slope_factor >= 2) //限制下降次数1次，节省时间，但会增大滞后，若cpu时间充裕可不用。
+				on = 0;
+		} while(on == 1);
+		
+		steepest->now_out = start_point ;//0.5f *(start_point + steepest->lst_out);//
+		steepest->now_velocity_xdt = steepest->now_out - steepest->lst_out;
 }
 
-
+// FIR 滤波器
 void fir_arrange_filter(float *arr,u16 len,u8 *fil_cnt,float in,float *arr_out) //len<=255 len >= 3
 {
 		//float arrange[len];
 		float tmp;
 		u8 i,j;
-	/*
-	窗口数据处理
-	*/		
+	
+	  //窗口数据处理		
 		if( ++*fil_cnt >= len )	
 			*fil_cnt = 0; //now
 		
 		arr[ *fil_cnt ] = in;	
 		
-	/*
-	赋值、排列
-	*/	
+	  //赋值、排列
 		for(i = 0;i < len; i++)
 			arr_out[i] = arr[i];
 		
-		for(i=0;i<len-1;i++)
+		for(i = 0;i < len - 1; i++)
 		{
-			for(j=0;j<len-1-i;j++)
+			for(j = 0;j < len - 1 - i; j++)
 			{
-				if(arr_out[j]>arr_out[j+1])
+				if(arr_out[j] > arr_out[j+1])
 				{
 					tmp = arr_out[j+1];
 					arr_out[j+1] = arr_out[j];

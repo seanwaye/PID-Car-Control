@@ -1,6 +1,6 @@
 /************************* (C) COPYRIGHT 2016 *******************************
  * 文件名  ：ANO_Drv_Uart.cpp
- * 描述    ：Uart
+ * 描述      ：UART1（保留接口，用于模块拓展）
 **********************************************************************************/
 #include "ANO_Drv_Uart.h"
 
@@ -77,9 +77,9 @@ static u8 RxState = 0;
 void Uart1_IRQ(void)
 {
 	if (USART_GetFlagStatus(USART1, USART_FLAG_ORE) != RESET)//??!????if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)???
-    {
+  {
         USART_ReceiveData(USART1);
-    }
+  }
 		
 	//发送中断
 	if((USART1->SR & (1<<7))&&(USART1->CR1 & USART_CR1_TXEIE))//if(USART_GetITStatus(USART1,USART_IT_TXE)!=RESET)
@@ -97,10 +97,10 @@ void Uart1_IRQ(void)
 		u8 com_data = USART1->DR;
 		static u8 _data_len = 0,_data_cnt = 0;
 		
-		if(RxState==0&&com_data==0xAA)
+		if(RxState == 0 && com_data == 0xAA)
 		{
-			RxState=1;
-			RxBuffer[0]=com_data;
+			RxState = 1;
+			RxBuffer[0] = com_data;
 		}
 		else if(RxState==1&&com_data==0xAA)
 		{

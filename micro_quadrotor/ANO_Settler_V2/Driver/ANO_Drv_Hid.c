@@ -34,6 +34,7 @@ void Usb_Hid_Receive()//不断查询
 	{
 		if(Hid_RxData[0] < 33 && Hid_RxData[1]==0xaa)
 		{
+			// USB可以获得模拟遥控器的数据
 			ANO_DT_Data_Receive_Anl(&(Hid_RxData[1]), Hid_RxData[0]);
 			//ANO_NRF_TxPacket_AP(&(Hid_RxData[1]),Hid_RxData[0]);
 		}

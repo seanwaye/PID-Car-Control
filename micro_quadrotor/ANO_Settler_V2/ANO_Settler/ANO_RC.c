@@ -1,6 +1,6 @@
 /***************************** (C) COPYRIGHT 2016 **********************************
- * 文件名  ：ANO_Param.cpp
- * 描述    ：参数读取和保存
+ * 文件名  ：ANO_RC.cpp
+ * 描述    ：  遥控器控制函数（Remote Control）
 *******************************************************************************************/
 
 #include "ANO_RC.h"
@@ -13,8 +13,8 @@
 u8 fly_ready = 0;
 u16 fly_ready_cnt = 0;
 
-u16 RX_CH[CH_NUM];
-s16 CH_N[CH_NUM];
+u16 RX_CH[CH_NUM];  // 接收参数数组
+s16 CH_N[CH_NUM];    // 执行参数数组
 
 void unlock()
 {
@@ -57,10 +57,9 @@ void unlock()
 		fly_ready_cnt = 0;
 	
 	if(CH_N[THR] > -350)
-		flag.thr_low = 0;//油门非低
+		flag.thr_low = 0;  //油门非低
 	else
-		flag.thr_low = 1;//油门拉低
-		
+		flag.thr_low = 1;  //油门拉低
 }
 
 void RC_duty(float dT) //建议2ms调用一次
@@ -71,7 +70,7 @@ void RC_duty(float dT) //建议2ms调用一次
 	
 	unlock();
 	
-//失控保护检查
+	//失控保护检查
 	fail_safe_check();
 }
 

@@ -1,7 +1,14 @@
-/*********************** (C) COPYRIGHT 2016 ******************************
+/*************************************************** (C) COPYRIGHT 2016 ********************************************************
  * 文件名  ：ANO_Drv_Nrf24l01.cpp
- * 描述    ：Nrf24l01
-**********************************************************************************/
+ * 描述    ：Nrf24l01驱动函数
+										普通 NRF20L01 的资料和开源代码，都是使用 NRF24L01 的单向通信方式，两
+										个 NRF 模块，一块发送，一块接收，如果想要双向通信，就要切换两个模块
+										的收发状态，但是由于模块的切换需要时间，而且两个模块的切换必须保持
+										同时，所以驱动的编写十分困难。我们使用了 NRF24L01+的高级功能——Ack with
+										payload，使用应答包携带用户数据，可以实现免切换收发状态，即可实现双向通讯
+										
+										为了减轻重量，时钟采用的是STM32的定时器输出
+**************************************************************************************************************************************/
 #include "ANO_Drv_Nrf24l01.h"
 #include "ANO_Data_Transfer.h"
 
@@ -56,6 +63,7 @@ uint8_t NRF24L01_2_TXDATA[RX_PLOAD_WIDTH];//nrf24l01需要发送的数据
 * 写寄存器
 *****************************************************************
 */
+
 uint8_t ANO_NRF_Write_Reg(uint8_t reg, uint8_t value)
 {
 	uint8_t status;
@@ -82,9 +90,7 @@ uint8_t ANO_NRF_Read_Reg(uint8_t reg)
 	
 /*
 *****************************************************************
-*
 * 写缓冲区
-*
 *****************************************************************
 */
 uint8_t ANO_NRF_Write_Buf(uint8_t reg, uint8_t *pBuf, uint8_t uchars)
@@ -119,7 +125,6 @@ uint8_t ANO_NRF_Read_Buf(uint8_t reg, uint8_t *pBuf, uint8_t uchars)
     return 	status;
 }
 
-
 void ANO_NRF_TxPacket(uint8_t * tx_buf, uint8_t len)
 {	
 	//ANO_SPI_CE_L();		 //StandBy I模式	
@@ -135,11 +140,8 @@ void ANO_NRF_TxPacket_AP(uint8_t * tx_buf, uint8_t len)
 	//ANO_SPI_CE_H();		 //置高CE
 }
 
-
-
 void ANO_NRF_Init(u8 model, u8 ch)
 {
-
 	//ANO_SPI_CE_L();
 	ANO_NRF_Write_Buf(NRF_WRITE_REG+RX_ADDR_P0,RX_ADDRESS,RX_ADR_WIDTH);	//写RX节点地址 
 	ANO_NRF_Write_Buf(NRF_WRITE_REG+TX_ADDR,TX_ADDRESS,TX_ADR_WIDTH); 		//写TX节点地址  
@@ -200,10 +202,8 @@ uint8_t ANO_NRF_Check(void)
 		if(buf1[i]!=TX_ADDRESS[i]) 
 			break; 
 	} 
-	if(i==5)
-		return 1; //MCU与NRF成功连接 
-	else
-		return 0; //MCU与NRF不正常连接 
+	if(i == 5) 	return 1; //MCU与NRF成功连接 
+	else return 0; //MCU与NRF不正常连接 
 }
 
 uint8_t NRF_SSI,NRF_SSI_CNT;//NRF信号强度
@@ -211,17 +211,20 @@ uint8_t NRF_SSI,NRF_SSI_CNT;//NRF信号强度
 void ANO_NRF_Check_Event(void)
 {
 	u8 sta = ANO_NRF_Read_Reg(NRF_READ_REG + NRFRegSTATUS);
-	////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////
-	if(sta & (1<<RX_DR))
+
+	if(sta & (1 << RX_DR))
 	{
 		u8 rx_len = ANO_NRF_Read_Reg(R_RX_PL_WID);
 		if(rx_len<33)
 		{
+			// 从BUFFER中获得数据
 			ANO_NRF_Read_Buf(RD_RX_PLOAD,NRF24L01_2_RXDATA,rx_len);// read receive payload from RX_FIFO buffer
 			//Uart1_Put_Buf(NRF24L01_2_RXDATA,rx_len);
+			
+			// 解析NRF的数据并对相应控制数组赋值
 			ANO_DT_Data_Receive_Anl(NRF24L01_2_RXDATA,rx_len);
 			
+			// USB转发
 			Usb_Hid_Adddata(NRF24L01_2_RXDATA,rx_len);
 			NRF_SSI_CNT++;
 		}
@@ -230,23 +233,17 @@ void ANO_NRF_Check_Event(void)
 			ANO_NRF_Write_Reg(FLUSH_RX,0xff);//清空缓冲区
 		}
 	}
-	////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////
-	if(sta & (1<<TX_DS))
+	if(sta & (1 << TX_DS))
 	{
 		
 	}
-	////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////
-	if(sta & (1<<MAX_RT))
+	if(sta & (1 << MAX_RT))
 	{
 		if(sta & 0x01)	//TX FIFO FULL
 		{
 			ANO_NRF_Write_Reg(FLUSH_TX,0xff);
 		}
 	}
-	////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////
 	ANO_NRF_Write_Reg(NRF_WRITE_REG + NRFRegSTATUS, sta);
 }
 

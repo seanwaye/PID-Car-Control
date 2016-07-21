@@ -8,14 +8,13 @@
 
 #include "ANO_Data.h"
 
-
+// 互补滤波输出结构体
 typedef struct
 {
 	float integration_1;
 	float integration_2;
 	float out_tmp;
 	float out;
-
 }_com_fil_t;
 
 typedef struct
@@ -50,25 +49,21 @@ void jyoun_limit_deadzone_filter(float T,float hz1,float hz2,_jldf_t *data,float
 
 void jyoun_filter(float dT,float hz,float ref_value,float exp,float fb,float *out);
 
-//float Moving_Average(u8 item,u8 width_num,float in);
-
-void Moving_Average(float moavarray[],//滤波数组 数组长度：len+1
-										u16 len ,//滤波数据长度
-										u16 *fil_cnt,//滤波元素号数标记（静态，用作存储）
-										float in,//输入
-										float *out //输出
+void Moving_Average(float moavarray[],  //滤波数组 数组长度：len+1
+										u16 len ,                         //滤波数据长度
+										u16 *fil_cnt,                     //滤波元素号数标记（静态，用作存储）
+										float in,                            //输入
+										float *out                         //输出
 										);
-
-
 
 void step_filter(float step,float in,float *out);
 
 void fir_arrange_filter(float *arr,u16 len,u8 *fil_cnt,float in,float *arr_out);  //len<=255 len >= 3
 
-void LPF_1(float hz,//截止频率
-					float time,//周期
-					float in,//输入
-					float *out//输出
+void LPF_1(float hz,  //截止频率
+					float time,      //周期
+					float in,          //输入
+					float *out        //输出
 					);
 
 					
@@ -76,38 +71,36 @@ void LPF_1_db(float hz,float time,double in,double *out); //低通滤波，2hz�
 
 void LPF_I(float raw_a,float raw_b,float time,float in,float *out,float *intera);
 
-void Complementary_filter(float T,//周期
-													float kp,//截止频率（hz）
-													float ki_1, //积分速度1 *使用ki_2前必须有ki_1
-													float ki_2, //积分速度2
-													float i_lim_1,//积分1限幅
-													float i_lim_2,
-													float in1_delta, //输入1，增量值
-													float in2 ,			//输入2，绝对位置值
-													_com_fil_t *   //互补融合数据结构体
+// 互补滤波
+void Complementary_filter(float T,      //周期
+													float kp,                //截止频率（hz）
+													float ki_1,              //积分速度1 *使用ki_2前必须有ki_1
+													float ki_2,              //积分速度2
+													float i_lim_1,          //积分1限幅
+													float i_lim_2,          //积分2限幅
+													float in1_delta,       //输入1，增量值
+													float in2 ,			          //输入2，绝对位置值
+													_com_fil_t *           //互补融合数据结构体
 													);
 
 
-float my_deadzone_3(float T,float hz,float x,float ,float zoom,float range_x,float *zoom_adj); //range_x   0 ----- 1  *****
+float my_deadzone_3(float T,float hz,float x,float ,float zoom,float range_x,float *zoom_adj); //range_x   0 ----- 1  
 
 
-/*============ 坐标转换 ===============
-适用坐标系
-					x
-					|
-			y---z
-			
-对应世界坐标中，x为地磁方向，z为重力方向。
-
-======================================*/
+/*======================= 坐标转换 =========================
+			适用坐标系
+								x
+								|
+						y---z
+						
+			对应世界坐标中，x为地磁方向，z为重力方向。
+=========================================================*/
 void vec_3d_transition(_xyz_f_st *ref, _xyz_f_st *in, _xyz_f_st *out);
-
 void mag_horizon_trans(_xyz_f_st *ref, _xyz_f_st *in, _xyz_f_st *out);
 
-													
-/*============== AHRS =================
-		自创AHRS姿态解算，非四元数
-======================================*/
+/*=======================   AHRS   =========================
+		                               AHRS姿态解算，非四元数
+=========================================================*/
 #define G_KP 1.0f
 #define M_KP 1.0f
 

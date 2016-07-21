@@ -1,11 +1,8 @@
-/******************** (C) COPYRIGHT 2014 ANO Tech ***************************
- * 作者		 ：秋雨魂
- * 文件名  ：ANO_Drv_Uart.cpp
- * 描述    ：LED
- * 官网    ：www.anotc.com
- * 淘宝    ：anotc.taobao.com
- * 技术Q群 ：190169595
-**********************************************************************************/
+/*************************** (C) COPYRIGHT 2016 ********************************
+ * 文件名  ：ANO_Drv_Uart3.cpp
+ * 描述    ：UART3（与 ESP-8266 WIFI模块相连，完成上位机数据收发）
+ *                 但是这个模块没有，需要自己加
+***************************************************************************************/
 #include "ANO_Drv_Uart3.h"
 #include "ANO_Data_Transfer.h"
 
@@ -57,8 +54,8 @@ void ANO_UART3_Init(u32 br_num)
 	NVIC_Init(&NVIC_InitStructure);
 }
 u8 TxBuffer3[256];
-u8 TxCounter3=0;
-u8 count3=0;
+u8 TxCounter3 = 0;
+u8 count3 = 0;
 
 void ANO_UART3_IRQ(void)
 {

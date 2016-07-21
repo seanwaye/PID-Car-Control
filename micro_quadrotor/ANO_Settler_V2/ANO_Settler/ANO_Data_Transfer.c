@@ -1,5 +1,5 @@
 /*************************  (C) COPYRIGHT 2016  ******************************
- * 文件名  ：ANO_IMU.c
+ * 文件名  ：ANO_Data_Transfer.cpp
  * 描述    ：数据传输函数
 **************************************************************************************/
 #include "ANO_Data_Transfer.h"
@@ -12,20 +12,20 @@
 #include "ANO_Param.h"
 #include "ANO_CTRL.h"
 
-/////////////////////////////////////////////////////////////////////////////////////
 //数据拆分宏定义，在发送大于1字节的数据类型时，比如int16、float等，需要把数据拆分成单独字节进行发送
 #define BYTE0(dwTemp)       ( *( (u8 *)(&dwTemp)		) )
 #define BYTE1(dwTemp)       ( *( (u8 *)(&dwTemp) + 1) )
 #define BYTE2(dwTemp)       ( *( (u8 *)(&dwTemp) + 2) )
 #define BYTE3(dwTemp)       ( *( (u8 *)(&dwTemp) + 3) )
 
-dt_flag_t f;					//需要发送数据的标志
+dt_flag_t f;					            //需要发送数据的标志
 u8 data_to_send[50];			//发送数据缓存
 static void ANO_DT_Send_Msg(u8 id, u8 data);
-/////////////////////////////////////////////////////////////////////////////////////
 
-//Data_Exchange函数处理各种数据发送请求，比如想实现每6ms发送一次传感器数据至上位机，即在此函数内实现(cnt = 6/2 = 3)
-//此函数应由用户每2ms调用一次
+/*
+* Data_Exchange函数处理各种数据发送请求，比如想实现每6ms发送一次传感器数据至上位机，即在此函数内实现(cnt = 6/2 = 3)
+* 此函数应由用户每2ms调用一次
+*/
 void ANO_DT_Data_Exchange(void) //2ms一次
 {
 	static u8 cnt = 0;
@@ -60,69 +60,57 @@ void ANO_DT_Data_Exchange(void) //2ms一次
 	if(++cnt>200) 
 		cnt = 0;
 	
-/////////////////////////////////////////////////////////////////////////////////////
 	if(f.msg_id)
 	{
 		ANO_DT_Send_Msg(f.msg_id,f.msg_data);
 		f.msg_id = 0;
 	}
-/////////////////////////////////////////////////////////////////////////////////////
 	else if(f.send_version)
 	{
 		f.send_version = 0;
 		ANO_DT_Send_Version(1,ANO_Param.hardware,ANO_Param.software,400,0);
 	}
-/////////////////////////////////////////////////////////////////////////////////////
 	else if(f.send_status)
 	{
 		f.send_status = 0;
 		ANO_DT_Send_Status(imu_data.rol,imu_data.pit,imu_data.yaw,0,0,fly_ready);	
 	}	
-/////////////////////////////////////////////////////////////////////////////////////
 	else if(f.send_speed)
 	{
 		f.send_speed = 0;
 		//ANO_DT_Send_Speed(airframe_x_sp,airframe_y_sp,wz_speed);
 	}
-/////////////////////////////////////////////////////////////////////////////////////
 	else if(f.send_user)
 	{
 		f.send_user = 0;
 		ANO_DT_Send_User();
 	}
-/////////////////////////////////////////////////////////////////////////////////////
 	else if(f.send_senser)
 	{
 		f.send_senser = 0;
-		ANO_DT_Send_Senser(sensor.Acc.x,sensor.Acc.y,sensor.Acc.z,
-												sensor.Gyro.x,sensor.Gyro.y,sensor.Gyro.z,
-												0,0,0);
+		ANO_DT_Send_Senser(sensor.Acc.x,sensor.Acc.y,sensor.Acc.z, sensor.Gyro.x,sensor.Gyro.y,sensor.Gyro.z, 0, 0, 0);
 	}	
-/////////////////////////////////////////////////////////////////////////////////////
 	else if(f.send_senser2)
 	{
 		f.send_senser2 = 0;
 		//ANO_DT_Send_Senser2(baroAlt,ultra_distance/10);
 	}	
-/////////////////////////////////////////////////////////////////////////////////////
 	else if(f.send_rcdata)
 	{
 		f.send_rcdata = 0;
+		// 发送遥控器参数
 		ANO_DT_Send_RCData(RX_CH[2],RX_CH[3],RX_CH[0],RX_CH[1],RX_CH[4],RX_CH[5],0,0,0,0);
 	}	
-/////////////////////////////////////////////////////////////////////////////////////	
 	else if(f.send_motopwm)
 	{
 		f.send_motopwm = 0;
 		ANO_DT_Send_MotoPWM(motor[0],motor[1],motor[2],motor[3],0,0,0,0);
 	}	
-/////////////////////////////////////////////////////////////////////////////////////
 	else if(f.send_power)
 	{
 		f.send_power = 0;
-		ANO_DT_Send_Power(123,456);
+		ANO_DT_Send_Power(123, 456);
 	}
-/////////////////////////////////////////////////////////////////////////////////////
 	else if(f.send_pid1)
 	{
 		f.send_pid1 = 0;
@@ -130,7 +118,6 @@ void ANO_DT_Data_Exchange(void) //2ms一次
 						  ANO_Param.PID_pit_s.kp,ANO_Param.PID_pit_s.ki,ANO_Param.PID_pit_s.kd,
 						  ANO_Param.PID_yaw_s.kp,ANO_Param.PID_yaw_s.ki,ANO_Param.PID_yaw_s.kd);
 	}	
-/////////////////////////////////////////////////////////////////////////////////////
 	else if(f.send_pid2)
 	{
 		f.send_pid2 = 0;
@@ -138,7 +125,6 @@ void ANO_DT_Data_Exchange(void) //2ms一次
 						  ANO_Param.PID_pit.kp,ANO_Param.PID_pit.ki,ANO_Param.PID_pit.kd,
 						  ANO_Param.PID_yaw.kp,ANO_Param.PID_yaw.ki,ANO_Param.PID_yaw.kd);
 	}
-/////////////////////////////////////////////////////////////////////////////////////
 	else if(f.send_pid3)
 	{
 		f.send_pid3 = 0;
@@ -146,19 +132,16 @@ void ANO_DT_Data_Exchange(void) //2ms一次
 											0,					0,					0,
 											0,					0,					0);
 	}
-/////////////////////////////////////////////////////////////////////////////////////
 	else if(f.send_pid4)
 	{
 		f.send_pid4 = 0;
 		ANO_DT_Send_PID(4,0,0,0,0,0,0,0,0,0);
 	}
-/////////////////////////////////////////////////////////////////////////////////////
 	else if(f.send_pid5)
 	{
 		f.send_pid5 = 0;
 		ANO_DT_Send_PID(5,0,0,0,0,0,0,0,0,0);
 	}
-/////////////////////////////////////////////////////////////////////////////////////
 	else if(f.send_pid6)
 	{
 		f.send_pid6 = 0;
@@ -166,19 +149,13 @@ void ANO_DT_Data_Exchange(void) //2ms一次
 	}
 	else if(f.send_location == 2)
 	{
-
 		//ANO_DT_Send_Location(0,10,test_lon *10000000,test_lat  *10000000,backhome_angle);
-		
 	}
-/////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////
+	
+	// 通过USB发送该数据
 	Usb_Hid_Send();					
-/////////////////////////////////////////////////////////////////////////////////////
 }
 
-/////////////////////////////////////////////////////////////////////////////////////
 //Send_Data函数是协议中所有发送数据功能使用到的发送函数
 //移植时，用户应根据自身应用的情况，根据使用的通信方式，实现此函数
 void ANO_DT_Send_Data(u8 *dataToSend , u8 length)
@@ -203,14 +180,14 @@ static void ANO_DT_Send_Check(u8 head, u8 check_sum)
 	data_to_send[4]=head;
 	data_to_send[5]=check_sum;
 	
-	
 	u8 sum = 0;
-	for(u8 i=0;i<6;i++)
+	for(u8 i = 0;i < 6; i++)
 		sum += data_to_send[i];
-	data_to_send[6]=sum;
+	data_to_send[6] = sum;
 
 	ANO_DT_Send_Data(data_to_send, 7);
 }
+
 static void ANO_DT_Send_Msg(u8 id, u8 data)
 {
 	data_to_send[0]=0xAA;
@@ -220,18 +197,19 @@ static void ANO_DT_Send_Msg(u8 id, u8 data)
 	data_to_send[4]=id;
 	data_to_send[5]=data;
 	
-	
 	u8 sum = 0;
-	for(u8 i=0;i<6;i++)
+	for(u8 i = 0;i < 6; i++)
 		sum += data_to_send[i];
-	data_to_send[6]=sum;
+	data_to_send[6] = sum;
 
 	ANO_DT_Send_Data(data_to_send, 7);
 }
-/////////////////////////////////////////////////////////////////////////////////////
-//Data_Receive_Prepare函数是协议预解析，根据协议的格式，将收到的数据进行一次格式性解析，格式正确的话再进行数据解析
-//移植时，此函数应由用户根据自身使用的通信方式自行调用，比如串口每收到一字节数据，则调用此函数一次
-//此函数解析出符合格式的数据帧后，会自行调用数据解析函数
+
+/*
+* Data_Receive_Prepare函数是协议预解析，根据协议的格式，将收到的数据进行一次格式性解析，格式正确的话再进行数据解析
+* 移植时，此函数应由用户根据自身使用的通信方式自行调用，比如串口每收到一字节数据，则调用此函数一次
+* 此函数解析出符合格式的数据帧后，会自行调用数据解析函数
+*/
 void ANO_DT_Data_Receive_Prepare(u8 data)
 {
 	static u8 RxBuffer[50];
@@ -276,24 +254,27 @@ void ANO_DT_Data_Receive_Prepare(u8 data)
 	else
 		state = 0;
 }
-/////////////////////////////////////////////////////////////////////////////////////
-//Data_Receive_Anl函数是协议数据解析函数，函数参数是符合协议格式的一个数据帧，该函数会首先对协议数据进行校验
-//校验通过后对数据进行解析，实现相应功能
-//此函数可以不用用户自行调用，由函数Data_Receive_Prepare自动调用
 
+/*
+* Data_Receive_Anl函数是协议数据解析函数，函数参数是符合协议格式的一个数据帧，该函数会首先对协议数据进行校验
+* 校验通过后对数据进行解析，实现相应功能
+* 此函数可以不用用户自行调用，由函数Data_Receive_Prepare自动调用
+*/
 extern u16 save_pid_en;
 
 void ANO_DT_Data_Receive_Anl(u8 *data_buf,u8 num)
 {
 	u8 sum = 0;
-	for(u8 i=0;i<(num-1);i++)
+	for(u8 i = 0;i < (num-1); i++)
 		sum += *(data_buf+i);
-	if(!(sum==*(data_buf+num-1)))		return;		//判断sum
-	if(!(*(data_buf)==0xAA && *(data_buf+1)==0xAF))		return;		//判断帧头
+	if(!(sum == *(data_buf+num-1)))		
+		return;		                            //判断sum
+	if(!(*(data_buf) == 0xAA && *(data_buf+1) == 0xAF))		
+		return;		//判断帧头
 	
-	if(*(data_buf+2)==0X01)
+	if(*(data_buf+2) == 0X01)
 	{
-		if(*(data_buf+4)==0X01)
+		if(*(data_buf+4) == 0X01)
 		{
 			sensor.acc_CALIBRATE = 1;
 			//sensor.Cali_3d = 1;
@@ -307,18 +288,6 @@ void ANO_DT_Data_Receive_Anl(u8 *data_buf,u8 num)
 			sensor.acc_CALIBRATE = 1;		
 			sensor.gyr_CALIBRATE = 1;			
 		}
-//		else if(*(data_buf+4)==0X04)
-//		{
-//			Mag_CALIBRATED = 1;
-//		}
-//		else if((*(data_buf+4)>=0X021)&&(*(data_buf+4)<=0X26))
-//		{
-//			acc_3d_calibrate_f = 1;
-//		}
-//		else if(*(data_buf+4)==0X20)
-//		{
-//			acc_3d_step = 0; //退出，6面校准步清0
-//		}
 		else if(*(data_buf+4)==0XA0)
 		{
 			fly_ready = 0;			
@@ -340,24 +309,25 @@ void ANO_DT_Data_Receive_Anl(u8 *data_buf,u8 num)
 			f.send_pid5 = 1;
 			f.send_pid6 = 1;
 		}
-		if(*(data_buf+4)==0X02)
+		if(*(data_buf+4) == 0X02)
 		{
 			
 		}
-		if(*(data_buf+4)==0XA0)		//读取版本信息
+		if(*(data_buf+4) == 0XA0)		//读取版本信息
 		{
 			f.send_version = 1;
 		}
-		if(*(data_buf+4)==0XA1)		//恢复默认参数
+		if(*(data_buf+4) == 0XA1)		//恢复默认参数
 		{
 			ANO_Param_Init();//Para_ResetToFactorySetup();
 		}
 	}
 
-	if(*(data_buf+2)==0X03)
+	if(*(data_buf+2) == 0X03)
 	{
 		flag.NS = 2;
 		
+		// 读入遥控器的控制参数
 		RX_CH[THR] = (vs16)(*(data_buf+4)<<8)|*(data_buf+5) ;
 		RX_CH[YAW] = (vs16)(*(data_buf+6)<<8)|*(data_buf+7) ;
 		RX_CH[ROL] = (vs16)(*(data_buf+8)<<8)|*(data_buf+9) ;
@@ -367,8 +337,9 @@ void ANO_DT_Data_Receive_Anl(u8 *data_buf,u8 num)
 		RX_CH[AUX3] = (vs16)(*(data_buf+16)<<8)|*(data_buf+17) ;
 		RX_CH[AUX4] = (vs16)(*(data_buf+18)<<8)|*(data_buf+19) ;
 	}
-
-	if(*(data_buf+2)==0X10)								//PID1
+	
+	// 读入PID控制参数
+	if(*(data_buf+2) == 0X10)								//PID1
     {
         ANO_Param.PID_rol_s.kp = ( (vs16)(*(data_buf+4)<<8)|*(data_buf+5) );
         ANO_Param.PID_rol_s.ki = ( (vs16)(*(data_buf+6)<<8)|*(data_buf+7) );
@@ -381,7 +352,7 @@ void ANO_DT_Data_Receive_Anl(u8 *data_buf,u8 num)
         ANO_Param.PID_yaw_s.kd 	= ( (vs16)(*(data_buf+20)<<8)|*(data_buf+21) );
 		
         ANO_DT_Send_Check(*(data_buf+2),sum);
-				//Param_SavePID();
+				//Param_SavePID(); // 保存PID参数
 				save_pid_en = 1;
     }
     if(*(data_buf+2)==0X11)								//PID2
@@ -428,7 +399,7 @@ void ANO_DT_Data_Receive_Anl(u8 *data_buf,u8 num)
 //         pid_setup.groups.ctrl3.kp 	= 0.001*( (vs16)(*(data_buf+16)<<8)|*(data_buf+17) );
 //         pid_setup.groups.ctrl3.ki 	= 0.001*( (vs16)(*(data_buf+18)<<8)|*(data_buf+19) );
 //         pid_setup.groups.ctrl3.kd 	= 0.001*( (vs16)(*(data_buf+20)<<8)|*(data_buf+21) );
-		ANO_DT_Send_Check(*(data_buf+2),sum);
+				ANO_DT_Send_Check(*(data_buf+2),sum);
 				save_pid_en = 1;
 	}
 	if(*(data_buf+2)==0X14)								//PID5
@@ -498,7 +469,6 @@ void ANO_DT_Send_Speed(float x_s,float y_s,float z_s)
 	data_to_send[_cnt++]=sum;
 	
 	ANO_DT_Send_Data(data_to_send, _cnt);
-
 }
 
 void ANO_DT_Send_Location(u8 state,u8 sat_num,s32 lon,s32 lat,float back_home_angle)
@@ -541,9 +511,7 @@ void ANO_DT_Send_Location(u8 state,u8 sat_num,s32 lon,s32 lat,float back_home_an
 	data_to_send[_cnt++]=sum;
 	
 	ANO_DT_Send_Data(data_to_send, _cnt);
-
 }
-
 
 void ANO_DT_Send_Status(float angle_rol, float angle_pit, float angle_yaw, s32 alt, u8 fly_model, u8 armed)
 {
@@ -702,6 +670,7 @@ void ANO_DT_Send_RCData(u16 thr,u16 yaw,u16 rol,u16 pit,u16 aux1,u16 aux2,u16 au
 	
 	ANO_DT_Send_Data(data_to_send, _cnt);
 }
+
 void ANO_DT_Send_Power(u16 votage, u16 current)
 {
 	u8 _cnt=0;
@@ -729,6 +698,7 @@ void ANO_DT_Send_Power(u16 votage, u16 current)
 	
 	ANO_DT_Send_Data(data_to_send, _cnt);
 }
+
 void ANO_DT_Send_MotoPWM(u16 m_1,u16 m_2,u16 m_3,u16 m_4,u16 m_5,u16 m_6,u16 m_7,u16 m_8)
 {
 	u8 _cnt=0;

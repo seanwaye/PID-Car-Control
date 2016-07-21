@@ -1,8 +1,7 @@
-/****************************************************************************************************
-*
-*
-*
-****************************************************************************************************/
+/***********************************  (C) COPYRIGHT 2016  *********************************
+ * 文件名  ：include.h
+ * 描述      ：宏定义和枚举类型声明的文件
+*************************************************************************************************/
 #ifndef _include_H_
 #define _include_H_
 
@@ -29,25 +28,25 @@
 #define PT_VER	400
 
 /***************LED GPIO定义******************/
-#define ANO_RCC_LED_0				RCC_APB2Periph_GPIOB
+#define ANO_RCC_LED_0				  RCC_APB2Periph_GPIOB
 #define ANO_GPIO_LED_0				GPIOB
-#define ANO_Pin_LED_0				GPIO_Pin_8
+#define ANO_Pin_LED_0				    GPIO_Pin_8
 /*********************************************/
 
 /***************UART1 GPIO定义******************/
-#define ANO_RCC_UART1		RCC_APB2Periph_GPIOA
+#define ANO_RCC_UART1		  RCC_APB2Periph_GPIOA
 #define ANO_GPIO_UART1		GPIOA
 #define ANO_UART1_Pin_TX	GPIO_Pin_9
 #define ANO_UART1_Pin_RX	GPIO_Pin_10
 /*********************************************/
 /***************SPI GPIO定义******************/
-#define ANO_GPIO_SPI		GPIOB
+#define ANO_GPIO_SPI		  GPIOB
 #define ANO_GPIO_CE			GPIOA
-#define RCC_GPIO_SPI		RCC_APB2Periph_GPIOB
-#define SPI_Pin_CSN			GPIO_Pin_12
-#define SPI_Pin_SCK			GPIO_Pin_13
-#define SPI_Pin_MISO		GPIO_Pin_14
-#define SPI_Pin_MOSI		GPIO_Pin_15
+#define RCC_GPIO_SPI		  RCC_APB2Periph_GPIOB
+#define SPI_Pin_CSN			  GPIO_Pin_12
+#define SPI_Pin_SCK			  GPIO_Pin_13
+#define SPI_Pin_MISO		    GPIO_Pin_14
+#define SPI_Pin_MOSI		    GPIO_Pin_15
 /*********************************************/
 /***************硬件中断优先级******************/
 #define NVIC_UART_P	3
@@ -86,7 +85,7 @@ enum
 // AUX10 ,
 // AUX11 ,
 // AUX12 ,
- CH_NUM,
+ CH_NUM, // 枚举类型的总数
 };
 
 enum

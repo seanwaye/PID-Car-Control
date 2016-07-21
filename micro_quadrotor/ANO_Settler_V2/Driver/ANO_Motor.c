@@ -30,7 +30,7 @@ void pwm_out_init()
 	/* Compute the prescaler value */
 	PrescalerValue = (uint16_t) (SystemCoreClock / (24000*ACCURACY)) - 1;
 	/* Time base configuration */
-	TIM_TimeBaseStructure.TIM_Period = 999;		//
+	TIM_TimeBaseStructure.TIM_Period = 999;
 	TIM_TimeBaseStructure.TIM_Prescaler = PrescalerValue;	//pwm时钟分频
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;	
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;		//向上计数

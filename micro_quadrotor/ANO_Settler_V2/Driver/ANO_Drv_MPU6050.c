@@ -13,6 +13,7 @@
 
 u8 mpu6050_buffer[14];
 
+// 经过IIC从MPU6050中读取数据
 void MPU6050_Read(void)
 {
 	IIC_Read_nByte(MPU6050_ADDR,MPU6050_RA_ACCEL_XOUT_H,14,mpu6050_buffer);
@@ -253,6 +254,8 @@ void mpu_type(float x,float y,float z)//6050批次问题检测
 	}
 
 }
+
+// 声明从MPU6050获得的直接数据的结构体
 _sensor_st sensor;
 
 s32 sum_temp[7]={0,0,0,0,0,0,0};
@@ -468,7 +471,7 @@ void MPU6050_Data_Offset()
  +y--|--
        |
 
-0:默认  
+0：默认  
 1：传感器顺时针90 度
 2：传感器顺时针180度
 3：传感器顺时针270度
@@ -523,85 +526,84 @@ s32 steepest_gy_arr[MPU_WINDOW_NUM ];
 s32 steepest_gz_arr[MPU_WINDOW_NUM ];
 
 //u32 test_time[5];
+// 从MPU6050中读取的原始数据，并做预处理
 void MPU6050_Data_Prepare(float T)
 {	
-	float sensor_val[6];
+		float sensor_val[6];
 
-	MPU6050_Read();
-	
-	MPU6050_Data_Offset(); //校准函数
+		MPU6050_Read();
+		
+		MPU6050_Data_Offset(); //校准函数
 
-	/*读取buffer原始数据*/
-	sensor.Acc_I16.x = ((((int16_t)mpu6050_buffer[0]) << 8) | mpu6050_buffer[1]) ;
-	sensor.Acc_I16.y = ((((int16_t)mpu6050_buffer[2]) << 8) | mpu6050_buffer[3]) ;
-	sensor.Acc_I16.z = ((((int16_t)mpu6050_buffer[4]) << 8) | mpu6050_buffer[5]) ;
- 
-	sensor.Gyro_I16.x = ((((int16_t)mpu6050_buffer[ 8]) << 8) | mpu6050_buffer[ 9]) ;
-	sensor.Gyro_I16.y = ((((int16_t)mpu6050_buffer[10]) << 8) | mpu6050_buffer[11]) ;
-	sensor.Gyro_I16.z = ((((int16_t)mpu6050_buffer[12]) << 8) | mpu6050_buffer[13]) ;
+		/*读取buffer原始数据*/
+		sensor.Acc_I16.x = ((((int16_t)mpu6050_buffer[0]) << 8) | mpu6050_buffer[1]) ;
+		sensor.Acc_I16.y = ((((int16_t)mpu6050_buffer[2]) << 8) | mpu6050_buffer[3]) ;
+		sensor.Acc_I16.z = ((((int16_t)mpu6050_buffer[4]) << 8) | mpu6050_buffer[5]) ;
+	 
+		sensor.Gyro_I16.x = ((((int16_t)mpu6050_buffer[ 8]) << 8) | mpu6050_buffer[ 9]) ;
+		sensor.Gyro_I16.y = ((((int16_t)mpu6050_buffer[10]) << 8) | mpu6050_buffer[11]) ;
+		sensor.Gyro_I16.z = ((((int16_t)mpu6050_buffer[12]) << 8) | mpu6050_buffer[13]) ;
 
-	sensor.Tempreature = ((((int16_t)mpu6050_buffer[6]) << 8) | mpu6050_buffer[7]); //tempreature
-	sensor.Ftempreature = sensor.Tempreature/340.0f + 36.5f;
-	
-	
-	/*得出校准后的数据*/
-	if(ANO_Param.sensor_type == MPU_6050_0)
-	{
-		sensor_val[A_X] = sensor.Acc_I16.x - ANO_Param.acc_offset.x ;
-		sensor_val[A_Y] = sensor.Acc_I16.y - ANO_Param.acc_offset.y ;
-		sensor_val[A_Z] = sensor.Acc_I16.z - ANO_Param.acc_offset.z + 4096;
-	}
-	else if(ANO_Param.sensor_type == MPU_6050_1)
-	{
-		sensor_val[A_X] = 2 *(sensor.Acc_I16.x - ANO_Param.acc_offset.x) ;
-		sensor_val[A_Y] = 2 *(sensor.Acc_I16.y - ANO_Param.acc_offset.y) ;
-		sensor_val[A_Z] = 2 *(sensor.Acc_I16.z - ANO_Param.acc_offset.z + 2048);
-	}
-	else
-	{
-		sensor.acc_CALIBRATE = 1;
-	}
- 
-	sensor_val[G_X] = sensor.Gyro_I16.x - ANO_Param.gyr_offset.x ;
-	sensor_val[G_Y] = sensor.Gyro_I16.y - ANO_Param.gyr_offset.y ;
-	sensor_val[G_Z] = sensor.Gyro_I16.z - ANO_Param.gyr_offset.z ;	
-	
-  //	test_time[0] = GetSysTime_us();
-	/*梯度下降拟合数据*/	
-	steepest_descend(steepest_ax_arr ,MPU_WINDOW_NUM_ACC ,&steepest_ax ,MPU_STEEPEST_NUM_ACC,(s32) sensor_val[A_X]);
-	steepest_descend(steepest_ay_arr ,MPU_WINDOW_NUM_ACC ,&steepest_ay ,MPU_STEEPEST_NUM_ACC,(s32) sensor_val[A_Y]);
-	steepest_descend(steepest_az_arr ,MPU_WINDOW_NUM_ACC ,&steepest_az ,MPU_STEEPEST_NUM_ACC,(s32) sensor_val[A_Z]);
-	steepest_descend(steepest_gx_arr ,MPU_WINDOW_NUM ,&steepest_gx ,MPU_STEEPEST_NUM,(s32) sensor_val[G_X]);
-	steepest_descend(steepest_gy_arr ,MPU_WINDOW_NUM ,&steepest_gy ,MPU_STEEPEST_NUM,(s32) sensor_val[G_Y]);
-	steepest_descend(steepest_gz_arr ,MPU_WINDOW_NUM ,&steepest_gz ,MPU_STEEPEST_NUM,(s32) sensor_val[G_Z]);
-  //	test_time[1] = GetSysTime_us();
-//	test_time[2] = test_time[1] - test_time[0];
-	/*传感器方向调整*/
-	sensor_dir( 1,													//加速度计方向
-				(float)steepest_ax.now_out,
-				(float)steepest_ay.now_out,//sensor_val[A_Z],//
-				(float)steepest_az.now_out,
-				&sensor.Acc.x ,
-				&sensor.Acc.y ,
-				&sensor.Acc.z );
-						
-	sensor_dir( 1,													//陀螺仪方向
-				(float)steepest_gx.now_out,
-				(float)steepest_gy.now_out,
-				(float)steepest_gz.now_out,
-				&sensor.Gyro.x,
-				&sensor.Gyro.y,
-				&sensor.Gyro.z);
-	
-//======================================================================
-	/*陀螺仪转换到度每秒*/
-	sensor.Gyro_deg.x = sensor.Gyro.x *0.0610361f ;//  /65535 * 4000; +-2000度
-	sensor.Gyro_deg.y = sensor.Gyro.y *0.0610361f ;
-	sensor.Gyro_deg.z = sensor.Gyro.z *0.0610361f ;
-	
-	/*加速度计转换到毫米每平方秒*/
-	sensor.Acc_mmss.x = sensor.Acc.x *2.392615 ;//   /65535 * 16*9800; +-8G
-	sensor.Acc_mmss.y = sensor.Acc.y *2.392615 ;
-	sensor.Acc_mmss.z = sensor.Acc.z *2.392615 ;
+		sensor.Tempreature = ((((int16_t)mpu6050_buffer[6]) << 8) | mpu6050_buffer[7]); //tempreature
+		sensor.Ftempreature = sensor.Tempreature/340.0f + 36.5f;
+		
+		
+		/*得出校准后的数据*/
+		if(ANO_Param.sensor_type == MPU_6050_0)
+		{
+			sensor_val[A_X] = sensor.Acc_I16.x - ANO_Param.acc_offset.x ;
+			sensor_val[A_Y] = sensor.Acc_I16.y - ANO_Param.acc_offset.y ;
+			sensor_val[A_Z] = sensor.Acc_I16.z - ANO_Param.acc_offset.z + 4096;
+		}
+		else if(ANO_Param.sensor_type == MPU_6050_1)
+		{
+			sensor_val[A_X] = 2 *(sensor.Acc_I16.x - ANO_Param.acc_offset.x) ;
+			sensor_val[A_Y] = 2 *(sensor.Acc_I16.y - ANO_Param.acc_offset.y) ;
+			sensor_val[A_Z] = 2 *(sensor.Acc_I16.z - ANO_Param.acc_offset.z + 2048);
+		}
+		else
+		{
+			sensor.acc_CALIBRATE = 1;
+		}
+	 
+		sensor_val[G_X] = sensor.Gyro_I16.x - ANO_Param.gyr_offset.x ;
+		sensor_val[G_Y] = sensor.Gyro_I16.y - ANO_Param.gyr_offset.y ;
+		sensor_val[G_Z] = sensor.Gyro_I16.z - ANO_Param.gyr_offset.z ;	
+		
+		//  梯度下降法拟合数据
+		steepest_descend(steepest_ax_arr ,MPU_WINDOW_NUM_ACC ,&steepest_ax ,MPU_STEEPEST_NUM_ACC,(s32) sensor_val[A_X]);
+		steepest_descend(steepest_ay_arr ,MPU_WINDOW_NUM_ACC ,&steepest_ay ,MPU_STEEPEST_NUM_ACC,(s32) sensor_val[A_Y]);
+		steepest_descend(steepest_az_arr ,MPU_WINDOW_NUM_ACC ,&steepest_az ,MPU_STEEPEST_NUM_ACC,(s32) sensor_val[A_Z]);
+		steepest_descend(steepest_gx_arr ,MPU_WINDOW_NUM ,&steepest_gx ,MPU_STEEPEST_NUM,(s32) sensor_val[G_X]);
+		steepest_descend(steepest_gy_arr ,MPU_WINDOW_NUM ,&steepest_gy ,MPU_STEEPEST_NUM,(s32) sensor_val[G_Y]);
+		steepest_descend(steepest_gz_arr ,MPU_WINDOW_NUM ,&steepest_gz ,MPU_STEEPEST_NUM,(s32) sensor_val[G_Z]);
+		
+		/*传感器方向调整*/
+		sensor_dir( 1,													//加速度计方向
+					(float)steepest_ax.now_out,
+					(float)steepest_ay.now_out,//sensor_val[A_Z],//
+					(float)steepest_az.now_out,
+					&sensor.Acc.x ,
+					&sensor.Acc.y ,
+					&sensor.Acc.z );
+							
+		sensor_dir( 1,													//陀螺仪方向
+					(float)steepest_gx.now_out,
+					(float)steepest_gy.now_out,
+					(float)steepest_gz.now_out,
+					&sensor.Gyro.x,
+					&sensor.Gyro.y,
+					&sensor.Gyro.z);
+		
+	//======================================================================
+		/*陀螺仪转换到度每秒*/
+		sensor.Gyro_deg.x = sensor.Gyro.x *0.0610361f ;//  /65535 * 4000; +-2000度
+		sensor.Gyro_deg.y = sensor.Gyro.y *0.0610361f ;
+		sensor.Gyro_deg.z = sensor.Gyro.z *0.0610361f ;
+		
+		/*加速度计转换到毫米每平方秒*/
+		sensor.Acc_mmss.x = sensor.Acc.x *2.392615 ;//   /65535 * 16*9800; +-8G
+		sensor.Acc_mmss.y = sensor.Acc.y *2.392615 ;
+		sensor.Acc_mmss.z = sensor.Acc.z *2.392615 ;
 }
 

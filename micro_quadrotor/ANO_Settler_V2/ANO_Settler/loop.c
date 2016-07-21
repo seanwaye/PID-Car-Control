@@ -42,23 +42,26 @@ void Loop_check()
 u32 test_time[10];
 void Duty_2ms()
 {
-		ANO_DT_Data_Exchange(); 			 //数据交换
+		//数据交换（只有发送数据到上位机部分）
+		ANO_DT_Data_Exchange(); 		
 		test_time[0] = GetSysTime_us();
-		MPU6050_Data_Prepare(0.002f); //6050传感器数据准备
+	
+		//6050传感器数据准备
+		MPU6050_Data_Prepare(0.002f); 
 
-		RC_duty(0.002f); 							          //遥控数据处理
+		// 上锁检测，将RX_CH赋值给CH_N，而RX_CH的控制参数是通过NRF轮询从遥控器读入的
+		RC_duty(0.002f); 							     
 	
 /*======================================================================================
 						CH_N  1横滚，2俯仰，3油门，4航向 范围：+-500
 =======================================================================================*/
-		// 遥控器的控制参数的传入
+		// 遥控器的控制参数的传入（由解锁检测处理之后传入）
 		CTRL_Duty((float)CH_N[ROL],(float)CH_N[PIT],(float)CH_N[THR],(float)CH_N[YAW]);//2ms
 		
 		// 计算完成数据交换的时间
 		test_time[1] = GetSysTime_us();
 		test_time[2] = test_time[1] - test_time[0];
 }
-
 
 void Duty_6ms()
 {
@@ -69,6 +72,7 @@ void Duty_6ms()
 		// 计算姿态解算的时间
 		test_time[5] = test_time[4] - test_time[3];
 }
+
 void Duty_10ms()
 {
 
@@ -121,8 +125,10 @@ void main_loop()
 		
 		loop.check_flag = 0;		//循环运行完毕标志
 	}
+	// 从遥控器中读入数据
 	ANO_NRF_Check_Event();
-	Usb_Hid_Receive();      //主循环里不断查询
+	//主循环里不断查询
+	Usb_Hid_Receive();     
 }
 /******************* (C) COPYRIGHT 2016 ANO TECH *****END OF FILE************/
 
