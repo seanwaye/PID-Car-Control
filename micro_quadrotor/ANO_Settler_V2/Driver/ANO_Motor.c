@@ -61,9 +61,9 @@ void pwm_out_init()
 void motor_out(s16 pwm[MOTOR_NUM])
 {
 	u8 i;
-	for(i = 0;i < MOTOR_NUM;i++)
+	for(i = 0;i < MOTOR_NUM; i++)
 	{
-		pwm[i] = LIMIT(pwm[i],0,1000);
+		pwm[i] = LIMIT(pwm[i], 0,1000);
 	}
 	
 	TIM2->CCR1 = (u16)pwm[0] ; 

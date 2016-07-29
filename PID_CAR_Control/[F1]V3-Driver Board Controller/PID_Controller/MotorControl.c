@@ -6,7 +6,6 @@
 // global parameter to set the speed
 // when we want to set a speed we could change this parameter
 static int16_t currentSettedSpeed;
-
 void setSpeed(int16_t speed)
 {
 	currentSettedSpeed = speed;
@@ -168,7 +167,7 @@ void Motor_Move(int16_t angle, u8 if_related, int16_t speed)
 		int16_t angleNow;
 		int16_t angleSet;
 
-	  /************************  make syre we get the right angle  ************************/
+	  /************************  make sure we get the right angle  ************************/
 		for(;i < 700;i++)
 			angleNow = Inertia_Get_Angle_Yaw();
 	  /*****************************************************************************************/
@@ -218,7 +217,7 @@ void Motor_Move(int16_t angle, u8 if_related, int16_t speed)
 					Motor_Set_Speed(LEFT, myABS(correctionAngle)); 
 					Motor_Set_Speed(RIGHT, myABS(correctionAngle));    
 				}
-				// update the current angle
+				// update the current angle (use filter)
 				for(;i < 30;i++)
 				{
 						temp = Inertia_Get_Angle_Yaw();
@@ -230,15 +229,15 @@ void Motor_Move(int16_t angle, u8 if_related, int16_t speed)
 				}
 				angleNow = (angleNow - max - min)/28;
 		}
-		Motor_Set_Speed(LEFT, 0); 
-		Motor_Set_Speed(RIGHT, 0);    
+//		Motor_Set_Speed(LEFT, 0); 
+//		Motor_Set_Speed(RIGHT, 0);    
 	
 		// after the turning, we should set the speed for the straight line
 		// but this function only set the parameter of the PID function
 		// use a global parameter
-		//Motor_If_Forward(RIGHT, 1);
-		//Motor_If_Forward(LEFT, 1);
-		//currentSettedSpeed = speed;
+		Motor_If_Forward(RIGHT, 1);
+		Motor_If_Forward(LEFT, 1);
+		currentSettedSpeed = speed;
 }
 
 /*
@@ -246,15 +245,14 @@ void Motor_Move(int16_t angle, u8 if_related, int16_t speed)
 * turn an approprite angle and go straight to reach the target position.
 * When we go straight, we should know how far we have ran.
 */
-void goToPosition(int16_t currentX, int16_t currentY, int16_t targetX, int16_t targetY)
+void goToPosition(int16_t currentX, int16_t currentY, int16_t targetX, int16_t targetY, int16_t speed)
 {
 	// get the distance
 	int16_t straightDistance = sqrt(pow(targetY-currentY, 2) + pow(targetX-currentX, 2));
 	
 	// we should calculate the angle we should turn
-	// int16_t currentAngle = Inertia_Get_Angle_Yaw();
 	int16_t turnAngle = asin(myABS((targetY-currentY)/straightDistance));
-
+	
 	// turn the angle and set the speed 
 	if(targetX > currentX && targetY > currentY)          // first quadrant
 		Motor_Move(turnAngle, 1, MAX_SPEED);

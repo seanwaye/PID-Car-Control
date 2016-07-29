@@ -56,6 +56,6 @@ int16_t calculateAngleDifference(int16_t angle1, int16_t angle2);
 /**********************************************************************/
 
 // go to the target position
-void goToPosition(int16_t currentX, int16_t currentY, int16_t targetX, int16_t targetY);
+void goToPosition(int16_t currentX, int16_t currentY, int16_t targetX, int16_t targetY, int16_t speed);
 
 #endif // MOTOR_CONTROL

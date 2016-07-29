@@ -22,7 +22,7 @@ _xyz_f_st vec_err_i;
 
 void IMU_update(float dT, _xyz_f_st *gyr, _xyz_f_st *acc, _imu_st *imu)
 {
-	float kp = 0.6,ki = 0;
+	float kp = 0.6, ki = 0;
 	
 	float q0q1,q0q2,q1q1,q1q3,q2q2,q2q3,q3q3,q1q2,q0q3;//q0q0,
 	float w_q, x_q, y_q, z_q;
@@ -31,12 +31,14 @@ void IMU_update(float dT, _xyz_f_st *gyr, _xyz_f_st *acc, _imu_st *imu)
 	_xyz_f_st  vec_err;
 	_xyz_f_st  d_angle;
 	 
+		// 获取到保存的四元数 
     w_q = imu->w;
     x_q = imu->x;
     y_q = imu->y;
     z_q = imu->z;
 	
-//		q0q0 = w_q * w_q;							
+		// 互补滤波
+    // q0q0 = w_q * w_q;							
 		q0q1 = w_q * x_q;
 		q0q2 = w_q * y_q;
 		q1q1 = x_q * x_q;
@@ -99,6 +101,7 @@ void IMU_update(float dT, _xyz_f_st *gyr, _xyz_f_st *acc, _imu_st *imu)
     imu->y = w_q*d_angle.y -  x_q*d_angle.z  + y_q                + z_q*d_angle.x;
     imu->z = w_q*d_angle.z + x_q*d_angle.y  -  y_q*d_angle.x + z_q;
 		
+		// 四元数归一化
 		q_length = my_sqrt(imu->w*imu->w + imu->x*imu->x + imu->y*imu->y + imu->z*imu->z);
     imu->w /= q_length;
     imu->x /= q_length;
@@ -106,9 +109,9 @@ void IMU_update(float dT, _xyz_f_st *gyr, _xyz_f_st *acc, _imu_st *imu)
     imu->z /= q_length;
 		
 		// 计算出欧拉角，用于PID系统
-		imu->pit =    asin         (2*q1q3  - 2*q0q2)                              *57.30f;
-		imu->rol =    fast_atan2(2*q2q3 + 2*q0q1, -2*q1q1-2*q2q2 + 1)*57.30f; 
-		imu->yaw = -fast_atan2(2*q1q2 + 2*q0q3, -2*q2q2-2*q3q3 + 1)*57.30f; 
+		imu->pit =    asin         (2*q1q3  - 2*q0q2)                              *57.30f;    // 俯仰角
+		imu->rol =    fast_atan2(2*q2q3 + 2*q0q1, -2*q1q1-2*q2q2 + 1)*57.30f;    // 横滚角
+		imu->yaw = -fast_atan2(2*q1q2 + 2*q0q3, -2*q2q2-2*q3q3 + 1)*57.30f;    // 偏航角
 }
 
 /****************** END OF FILE ****************/

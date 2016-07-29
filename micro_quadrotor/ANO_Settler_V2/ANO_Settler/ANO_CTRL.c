@@ -341,5 +341,3 @@ void motor_ctrl(float dT,s16 ct_val_rol,s16 ct_val_pit,s16 ct_val_yaw,s16 ct_val
 /******************* (C) COPYRIGHT 2016 ANO TECH *****END OF FILE************/
 
 
-
-
