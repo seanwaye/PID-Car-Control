@@ -191,11 +191,13 @@ void Motor_Move(int16_t angle, u8 if_related, int16_t speed)
 				/**************************************************************************************************/
 			
 				// delta calculation     
-				correctionAngle = Proportion  * (currentError - AngleLastError)                                           // E[k]              
-														     + Integral      * AngleLastError                                                                // E[k-1]
-																 + Derivative  * (AnglePrevError - 2*AngleLastError + AnglePrevError)          // E[k-2] 
-			                           + 50;
+				//correctionAngle = Proportion  * (currentError - AngleLastError)                                           // E[k]              
+					//									     + Integral      * AngleLastError                                                                // E[k-1]
+				//												 + Derivative  * (AnglePrevError - 2*AngleLastError + AnglePrevError)          // E[k-2] 
+			   //                        + 0;
 
+				correctionAngle = currentError*5;
+			
 				PrevError = LastError;     // save last error, for next usage 
 				LastError = currentError;
 
@@ -229,8 +231,8 @@ void Motor_Move(int16_t angle, u8 if_related, int16_t speed)
 				}
 				angleNow = (angleNow - max - min)/28;
 		}
-//		Motor_Set_Speed(LEFT, 0); 
-//		Motor_Set_Speed(RIGHT, 0);    
+		Motor_Set_Speed(LEFT, 0); 
+		Motor_Set_Speed(RIGHT, 0);    
 	
 		// after the turning, we should set the speed for the straight line
 		// but this function only set the parameter of the PID function
@@ -248,20 +250,48 @@ void Motor_Move(int16_t angle, u8 if_related, int16_t speed)
 void goToPosition(int16_t currentX, int16_t currentY, int16_t targetX, int16_t targetY, int16_t speed)
 {
 	// get the distance
-	int16_t straightDistance = sqrt(pow(targetY-currentY, 2) + pow(targetX-currentX, 2));
+	int16_t straightDistance;
+	int16_t turnAngle;
+	int16_t* coor;
+	coor = getCoordination();
+	currentX = coor[0]/10;
+	currentY = coor[1]/10;
+	targetX = 0;
+	targetY = 0;
+	straightDistance = sqrt(pow(targetY-currentY, 2) + pow(targetX-currentX, 2));
 	
 	// we should calculate the angle we should turn
-	int16_t turnAngle = asin(myABS((targetY-currentY)/straightDistance));
+	turnAngle = asin(myABS((targetY-currentY)/straightDistance));
 	
+	if(straightDistance < 40 )
+	{
+		Motor_If_Forward(RIGHT, 0);
+		Motor_If_Forward(LEFT, 0);
+		currentSettedSpeed = 300;
+	}
+	else if (straightDistance > 40 && straightDistance < 60)
+	{
+		Motor_If_Forward(RIGHT, 0);
+		Motor_If_Forward(LEFT, 0);
+		currentSettedSpeed = 0;
+	}
+	else
+	{
+		Motor_If_Forward(RIGHT, 1);
+		Motor_If_Forward(LEFT, 1);
+		currentSettedSpeed = 300;
+	}
+		
+		
 	// turn the angle and set the speed 
-	if(targetX > currentX && targetY > currentY)          // first quadrant
-		Motor_Move(turnAngle, 1, MAX_SPEED);
-	else if(targetX < currentX && targetY > currentY)   // second quadrant
-		Motor_Move(-turnAngle, 1, MAX_SPEED);
-	else if(targetX < currentX && targetY < currentY)   // third quadrant
-		Motor_Move(turnAngle - MAX_ANGLE/2, 1, MAX_SPEED);
-	else                                                                  // forth quadrant
-		Motor_Move(MAX_ANGLE/2 - turnAngle, 1, MAX_SPEED);
+//	if(targetX > currentX && targetY > currentY)          // first quadrant
+//		Motor_Move(turnAngle, 1, MAX_SPEED);
+//	else if(targetX < currentX && targetY > currentY)   // second quadrant
+//		Motor_Move(-turnAngle, 1, MAX_SPEED);
+//	else if(targetX < currentX && targetY < currentY)   // third quadrant
+//		Motor_Move(turnAngle - MAX_ANGLE/2, 1, MAX_SPEED);
+//	else                                                                  // forth quadrant
+//		Motor_Move(MAX_ANGLE/2 - turnAngle, 1, MAX_SPEED);
 
 	// run the distance
 	// TODO

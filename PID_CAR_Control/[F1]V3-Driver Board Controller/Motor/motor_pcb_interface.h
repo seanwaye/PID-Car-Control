@@ -118,20 +118,12 @@ extern float sAngle;
 
 /* right */
 #define nFAULT_RIGHT									GPIO_Pin_8
-#define MODE1_RIGHT										GPIO_Pin_9
-#define MODE2_RIGHT										GPIO_Pin_10
-#define nSLEEP_RIGHT									GPIO_Pin_11
+#define MODE1_RIGHT									GPIO_Pin_9
+#define MODE2_RIGHT									GPIO_Pin_6  // temprory!!!!!!!!!!!
+#define nSLEEP_RIGHT									GPIO_Pin_7  // temprory!!!!!!!!!!!
 
 #define CONTROL_GPIO									GPIOB
 
-//ADC - PAx
-/* left */
-//#define Vpropi_LEFT										GPIO_Pin_1.
-//#define ADC_GPIO_LEFT									GPIOA
-
-///* right */
-//#define Vpropi_RIGHT									GPIO_Pin_2
-//#define ADC_GPIO_RIGHT								GPIOA
 
 /* Exported functions ------------------------------------------------------- */
 
@@ -145,8 +137,16 @@ void Motor_Tonggle_Direc(u8 left_or_right);
 
 void Usart_PID_init(void);
 void Usart_JY901_init(void);
+void Usart_UWB_init(void);
+
+// UWB -- get coordination
+void AnalyzeDataFromUWB(unsigned char ucData);
+int16_t* getCoordination(void);
+
+// JY901 -- get angle
 void ParseSerialData(unsigned char ucData);
 int16_t Inertia_Get_Angle_Yaw(void);
+
 void Encoder_EXTI_Configuration(void);
 
 void Sampling_Tick_Speed(void);
@@ -161,8 +161,13 @@ int16_t returnSpeed(void);
 void Motor_Move(int16_t angle, u8 if_related, int16_t speed);
 int16_t returnAngle(void);
 
+// go to the target position
+void goToPosition(int16_t currentX, int16_t currentY, int16_t targetX, int16_t targetY, int16_t speed);
+
+void My_Send_Data(USART_TypeDef* USARTx, u8 *data, u16 length);
+
 // data to be sent of PID and JY901
-static char sendDataPID[4];
-static char sendDataAngle[4];
+static u8 sendDataPID[4];
+static u8 sendDataAngle[4];
 
 #endif /* __MOTOR_PCB_INTI */

@@ -1,8 +1,3 @@
-/**
-  ******************************************************************************
-  * JY-901代码
-  ******************************************************************************
-  */
 /* Includes ------------------------------------------------------------------*/
 #include "JY901.h"
 #include "motor_pcb_interface.h"
@@ -38,7 +33,7 @@ float Calculate_Angle()
 	i %= 5;
 	for (j = 0; j < 5; j++)
 	{
-		sum+=temp_Angle[j];
+		sum += temp_Angle[j];
 		if (max < temp_Angle[j])
 			max = temp_Angle[j];
 		if (min > temp_Angle[j])
@@ -47,20 +42,46 @@ float Calculate_Angle()
 	return ((sum - max - min)*60/32768);
 }
 
+float Calculate_Angle_2()
+{
+	float sum_sin = 0;
+	float sum_cos = 0;
+	float angle = 0;
+	short j=0;
+	temp_Angle[i++] = stcAngle.Angle[2];
+	i %= 5;
+	if(temp_Angle[4] == 0)
+	{
+		return 0;
+	}
+	for(j=0; j<5; j++)
+	{
+		angle =  (float)temp_Angle[j]*3.1415926/32768;
+	//	angle = temp_Angle[j]*3.1415926/32768;
+		sum_sin += sin(angle);
+		sum_cos += cos(angle);
+	}
+	return atan2(sum_sin/5, sum_cos/5) * 180/3.1415926;
+}
+
 void ParseSerialData(unsigned char ucData)
 {
 	static unsigned char ucRxCnt = 0;	
 	static unsigned char ucRxBuffer[12];
+	int16_t temp;
+	int16_t temp2;
+	sendDataPID[2] = 0x0d;
+	sendDataPID[3] = 0x0a;
 	
-	ucRxBuffer[ucRxCnt++]=ucData;
+	ucRxBuffer[ucRxCnt++] = ucData;
 	
-	if (ucRxBuffer[0]!=0x55)  //数据头不对，则重新开始寻找0x55数据头
+	if (ucRxBuffer[0] != 0x55)  //数据头不对，则重新开始寻找0x55数据头
 	{
 		ucRxCnt=0;
 		return;
 	}
 	
-	if (ucRxCnt<11) {return;} //数据不满11个，则返回
+	if (ucRxCnt < 11) {return;} //数据不满11个，则返回
 	else
 	{
 		switch(ucRxBuffer[1])
@@ -70,7 +91,7 @@ void ParseSerialData(unsigned char ucData)
 			case 0x51:	memcpy(&stcAcc, &ucRxBuffer[2], 8); break;			//加速度
 			case 0x52:	memcpy(&stcGyro, &ucRxBuffer[2], 8); break;			//角速度								
 			case 0x53:	memcpy(&stcAngle, &ucRxBuffer[2], 8);						//角度
-									sAngle = Calculate_Angle(); break;
+									sAngle = Calculate_Angle_2(); break;
 									//sAngle = (float)(stcAngle.Angle[2] * 2.0 / 2.0); break;
 			case 0x54:	memcpy(&stcMag, &ucRxBuffer[2], 8); break;			//磁场
 			case 0x55:	memcpy(&stcDStatus, &ucRxBuffer[2], 8); break;	//端口状态数据
@@ -81,6 +102,22 @@ void ParseSerialData(unsigned char ucData)
 			default:	break;
 		}
 		ucRxCnt=0;
+//		temp = sAngle;
+//		temp2 = sAngle;
+//    sendDataPID[0] = ((temp2) >> 8) & 0xFF;
+//    sendDataPID[1] = temp & 0xFF;
+//	  My_Send_Data(USART1, sendDataPID, 4);
+	}
+}
+
+void My_Send_Data(USART_TypeDef* USARTx, u8 *data, u16 length)
+{
+	static u8 i;
+	
+	for(i = 0; i < length; i++)
+	{
+		USART_SendData(USARTx, data[i]);
+		while(USART_GetFlagStatus(USARTx, USART_FLAG_TXE) == RESET);
 	}
 }
 

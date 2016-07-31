@@ -134,10 +134,11 @@ void PendSV_Handler(void)
   * @param  None
   * @retval None
   */
-static u8 encoderCounter = 0;
-static u16 motorControlCounter = 0;
 void SysTick_Handler(void)
 {
+	static u8 encoderCounter = 0;
+	static u16 motorControlCounter = 0;
+	
 	motorControlCounter++;
 	encoderCounter++;
 	
@@ -184,56 +185,18 @@ void SysTick_Handler(void)
   * @param  None
   * @retval None
   */
-static int uartCounter = 0;
-static u8 pointer = 0;
+//static int uartCounter = 0;
+//static u8 pointer = 0;
 void USART1_IRQHandler(void)
 {
-	static int16_t motorDifference = 0;
-	if(USART_GetITStatus(USART1, USART_IT_TXE) != RESET)
-	{
-			uint16_t temp;
-		  // inilazition of the data to be snet ending
-			sendDataPID[2] = 0x0d;
-			sendDataPID[3] = 0x0a;
-			uartCounter++;
-			if(uartCounter == 500)
-			{
-				// the speed differnece between two wheel
-				// left - right
-				//motorDifference = Get_Speed(0) - Get_Speed(1);
-				
-				// send the difference	of  angle
-				/***************************************************************************************************************************/
-				
-				/*motorDifference = Inertia_Get_Angle_Yaw();
-				
-					if(motorDifference > 0)
-							motorDifference = motorDifference % 360;
-					else
-							motorDifference = (360 + motorDifference) % 360;
-				*/
-				motorDifference = returnAngle();
-				
-				/****************************************************************************************************************************/
-	
-				uartCounter = 0;
-				temp = motorDifference;
-				sendDataPID[0] = ((motorDifference) >> 8) & 0xFF;
-				sendDataPID[1] = temp & 0xFF;
-				
-				// sned a 5 length messgae
-				if(pointer == 4)
-					pointer = 0;
-				USART_SendData(USART1, sendDataPID[pointer]);
-				pointer++;
-			}
-	}
+
 }
 
+
 /**
-  * @brief  This function handles USART1 Handler. For JY901.
+  * @brief     This function handles USART2 Handler. For JY901.
   * @param  None
-  * @retval None
+  * @retval   None
   */
 void USART2_IRQHandler(void)
 {
@@ -244,4 +207,20 @@ void USART2_IRQHandler(void)
 	}
 }	
 
-/******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
+
+/**
+  * @brief     This function handles USART3 Handler. For UWB.
+  * @param  None
+  * @retval   None
+  */
+void USART3_IRQHandler(void)
+{
+	if (USART_GetITStatus(USART3, USART_IT_RXNE) != RESET)
+	{	
+		// get 8 bits from the USART
+		u8 temp = USART_ReceiveData(USART3);
+		AnalyzeDataFromUWB(temp);
+	}
+}	
+
+/******************* (C) COPYRIGHT 2011 STMicroelectronics *****  END OF FILE  ****/

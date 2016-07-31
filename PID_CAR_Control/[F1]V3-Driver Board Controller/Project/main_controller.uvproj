@@ -136,7 +136,7 @@
             <UseTarget>1</UseTarget>
             <LoadApplicationAtStartup>1</LoadApplicationAtStartup>
             <RunToMain>1</RunToMain>
-            <RestoreBreakpoints>0</RestoreBreakpoints>
+            <RestoreBreakpoints>1</RestoreBreakpoints>
             <RestoreWatchpoints>1</RestoreWatchpoints>
             <RestoreMemoryDisplay>1</RestoreMemoryDisplay>
             <RestoreFunctions>0</RestoreFunctions>
@@ -504,7 +504,7 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>IMU</GroupName>
+          <GroupName>Sensor</GroupName>
           <Files>
             <File>
               <FileName>JY901.c</FileName>
@@ -512,9 +512,14 @@
               <FilePath>..\IMU\JY901.c</FilePath>
             </File>
             <File>
-              <FileName>usart_imu.c</FileName>
+              <FileName>usart_configuration.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\IMU\usart_imu.c</FilePath>
+              <FilePath>..\USART\usart_configuration.c</FilePath>
+            </File>
+            <File>
+              <FileName>UWB.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\UWB\UWB.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -63,6 +63,9 @@ void Motor_Init(void)
 	//Usart1 init for PID
 	Usart_PID_init();
 	
+	//Usart3 init for UWB
+	Usart_UWB_init();
+	
 	//Encoder init for speed
 	Encoder_EXTI_Configuration();
 	
