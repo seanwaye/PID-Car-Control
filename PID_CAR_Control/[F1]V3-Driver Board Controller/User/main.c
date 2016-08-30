@@ -28,8 +28,8 @@ int main(void)
 	//Motor_If_FastDecay(1);
 	
 	// 1 means forward
-	//Motor_If_Forward(0, 1);
-	//Motor_If_Forward(1, 1);
+	Motor_If_Forward(0, 1);
+	Motor_If_Forward(1, 1);
 	//Motor_Set_Speed(0, 300);
 	//Motor_Set_Speed(1, 300);
 	//setSpeed(300);
@@ -38,7 +38,7 @@ int main(void)
 	{
 		//goToPosition(0, 0, 0, 0, 600);
 		Delay(1000);
-		//Motor_Move(90, 1, 0);
+		Motor_Move(90, 1, 0);
 	}      
 }
 

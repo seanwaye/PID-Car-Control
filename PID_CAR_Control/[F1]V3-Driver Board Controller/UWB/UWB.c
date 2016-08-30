@@ -40,11 +40,11 @@ void AnalyzeDataFromUWB(unsigned char ucData)
 			coordination[1] = Rx_Buffer[3] << 8 | Rx_Buffer[4];
 			
 			/***************************************************  send in UART1  ************************************************/
-			temp = coordination[0];
-		  temp2 = coordination[0];
-      sendDataPID[0] = ((temp2) >> 8) & 0xFF;
-      sendDataPID[1] = temp & 0xFF;
-	    My_Send_Data(USART1, sendDataPID, 4);
+//			temp = coordination[0];
+//		  temp2 = coordination[0];
+//      sendDataPID[0] = ((temp2) >> 8) & 0xFF;
+//      sendDataPID[1] = temp & 0xFF;
+//	    My_Send_Data(USART1, sendDataPID, 4);
 			/***********************************************************************************************************************/
 			
 			// reset

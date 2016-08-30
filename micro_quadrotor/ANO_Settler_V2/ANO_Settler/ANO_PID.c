@@ -7,7 +7,7 @@
 void PID_calculate( float T,            //周期（单位：秒）
 					float in_ff,			      	            //前馈值
 					float expect,		    	            //期望值（设定值）
-					float feedback,		   	            //反馈值（）
+					float feedback,		   	            //反馈值
 					PID_arg_t *pid_arg,            //PID参数结构体
 					PID_val_t *pid_val,	            //PID数据结构体
 					float inte_lim,		      	          //integration limit，积分限幅

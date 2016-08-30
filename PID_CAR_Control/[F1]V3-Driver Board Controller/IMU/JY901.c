@@ -102,11 +102,11 @@ void ParseSerialData(unsigned char ucData)
 			default:	break;
 		}
 		ucRxCnt=0;
-//		temp = sAngle;
-//		temp2 = sAngle;
-//    sendDataPID[0] = ((temp2) >> 8) & 0xFF;
-//    sendDataPID[1] = temp & 0xFF;
-//	  My_Send_Data(USART1, sendDataPID, 4);
+		temp = sAngle;
+		temp2 = sAngle;
+    sendDataPID[0] = ((temp2) >> 8) & 0xFF;
+    sendDataPID[1] = temp & 0xFF;
+	  My_Send_Data(USART1, sendDataPID, 4);
 	}
 }
 

@@ -24,19 +24,17 @@ int main(void)
   Delay(10);
 	Motor_Init();
 	Delay(200);
-	//Motor_If_Awake(1);
-	//Motor_If_FastDecay(1);
 	
 	// 1 means forward
 	Motor_If_Forward(0, 1);
 	Motor_If_Forward(1, 1);
 	//Motor_Set_Speed(0, 300);
 	//Motor_Set_Speed(1, 300);
-	setSpeed(300);
+	//setSpeed(300);
 	
 	while(1)
 	{
-	Motor_Set_Speed(0, 300);
+	  Motor_Set_Speed(0, 300);
 		//goToPosition(0, 0, 0, 0, 600);
 		Delay(1000);
 		//Motor_Move(90, 1, 0);

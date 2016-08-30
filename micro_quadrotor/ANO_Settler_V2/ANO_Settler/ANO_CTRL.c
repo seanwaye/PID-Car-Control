@@ -328,9 +328,9 @@ void motor_ctrl(float dT,s16 ct_val_rol,s16 ct_val_pit,s16 ct_val_yaw,s16 ct_val
 		if(fly_ready)
 		{
 			if(flag.thr_low == 1)
-				motor[i] = LIMIT(motor[i],0,100);
+				motor[i] = LIMIT(motor[i], 0, 100);
 			else
-				motor[i] = LIMIT(motor[i],100,1000);
+				motor[i] = LIMIT(motor[i], 100,1000);
 		}
 		else
 			motor[i] = 0;
