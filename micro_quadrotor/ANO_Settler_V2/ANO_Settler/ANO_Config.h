@@ -3,9 +3,11 @@
 
 #include "stm32f10x.h"
 
+// 开启三种数据传输模式
 #define ANO_DT_USE_USB_HID
 #define ANO_DT_USE_NRF24l01
 #define ANO_DT_USE_WIFI
+
 #define ACC_CAL_EN
 
 #define OFFSET_AV_NUM 50

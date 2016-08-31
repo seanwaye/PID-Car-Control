@@ -1,14 +1,16 @@
-/*
+/***********************************  (C) COPYRIGHT 2016  *********************************
+ * 文件名  ：ANO_Drv_ADC.c
+ * 描述      ：ADC的驱动函数
+ * 端口映射：
+	THR 	      -   PA0	-	ADC12_IN0
+	YAW		  -	  PA1	-	ADC12_IN1
+	PITCH	    - 	PA2	-	ADC12_IN2
+	ROLL	    - 	PA3	-	ADC12_IN3
+	POWER	-	  PA4	-	ADC12_IN4
+	KEY_L	  -	  PB0	-	ADC12_IN8
+	KEY_R	  -	  PB1	-	ADC12_IN9
 
-THR 	- PA0	-	ADC12_IN0
-YAW		-	PA1	-	ADC12_IN1
-PITCH	-	PA2	-	ADC12_IN2
-ROLL	-	PA3	-	ADC12_IN3
-POWER	-	PA4	-	ADC12_IN4
-KEY_L	-	PB0	-	ADC12_IN8
-KEY_R	-	PB1	-	ADC12_IN9
-
-*/
+*************************************************************************************************/
 #include "ANO_Drv_ADC.h"
 
 #define ADC1_DR_Address    ((u32)0x40012400+0x4c)
@@ -19,7 +21,7 @@ __IO uint16_t ADC_ConvertedValue[6];
 /*
  * 函数名：ADC1_GPIO_Config
  * 描述  ：使能ADC1和DMA1的时钟，初始化PC.01
- * 输入  : 无
+ * 输入  ：无
  * 输出  ：无
  * 调用  ：内部调用
  */

@@ -22,12 +22,15 @@
 #define MY_PPPIII   3.14159f
 #define MY_PPPIII_HALF   1.570796f
 
-////计算浮点数平方
-//float my_pow(float a)
+//计算浮点数平方
 #define my_pow(x) ((x)*(x))
+// 求绝对值
 #define ABS(x) ( (x)>0?(x):-(x) )
+// 限幅
 #define LIMIT( x,min,max ) ( (x) < (min)  ? (min) : ( (x) > (max) ? (max) : (x) ) )
+// 最小值
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
+// 最大值
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 float my_abs(float f);
@@ -37,6 +40,7 @@ float my_sqrt(float number);
 double mx_sin(double rad);
 double my_sin(double rad);
 float my_cos(double rad);
+
 float my_deadzone(float x,float ,float zoom);
 float my_deadzone_2(float x,float ,float zoom);
 
@@ -47,7 +51,6 @@ float safe_div(float numerator ,float denominator);
 float my_HLP(float T,float hz,float x,float zoom,float,float *zoom_adj);
 
 double my_norm_2(double x,double y);
-
 double my_norm_3(double x,double y,double z);
 
 float second_degree(float in ,float max,float first_p);

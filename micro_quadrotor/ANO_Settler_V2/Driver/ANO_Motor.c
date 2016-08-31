@@ -58,6 +58,7 @@ void pwm_out_init()
 	TIM_Cmd(TIM2, ENABLE);
 }
 
+// 四个电机都采用TIM2作为PWM时钟源，分别采用四个通道
 void motor_out(s16 pwm[MOTOR_NUM])
 {
 	u8 i;

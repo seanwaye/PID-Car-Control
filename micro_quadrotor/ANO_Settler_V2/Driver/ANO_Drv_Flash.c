@@ -1,3 +1,7 @@
+/*************************************************  (C) COPYRIGHT 2016  ********************************************************
+ * 文件名  ：ANO_Drv_Flash.c
+ * 描述    ：Flash操作函数
+*************************************************************************************************************************************/
 #include "ano_drv_flash.h"
 
 #define BYTE0(dwTemp)       (*(char *)(&dwTemp))
@@ -21,7 +25,6 @@ u8 ANO_Flash_Read(u8 *addr, u16 len)	//addr需要写入结构体的地址，len�
 			temp = (*(__IO uint16_t*)(PARAMFLASH_BASE_ADDRESS+i));
 			addr[i] = BYTE0(temp);
 		}
-
 	}
 	return 1;
 }
@@ -46,8 +49,11 @@ u8 ANO_Flash_Write(u8 *addr, u16 len)
 			temp = 0xff00 + addr[i];
 		
 		FlashStatus = FLASH_ProgramHalfWord(PARAMFLASH_BASE_ADDRESS+i, temp);
-        if (FlashStatus != FLASH_COMPLETE)
+    if (FlashStatus != FLASH_COMPLETE)
 			return 0;
 	}
 	return 1;
 }
+
+
+/******************* (C) COPYRIGHT 2016 ANO TECH *****END OF FILE************/

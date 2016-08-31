@@ -92,8 +92,11 @@ void CTRL_0_PID_Init()
 // 所有的PID的参数的初始化
 void pid_init(void)
 {
+	// 角度环初始化
 	CTRL_2_PID_Init();
+	// 角速度环初始化
 	CTRL_1_PID_Init();
+	// 油门环初始化
 	CTRL_0_PID_Init();
 }
 

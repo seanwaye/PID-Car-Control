@@ -1,3 +1,7 @@
+/***********************************  (C) COPYRIGHT 2016  *********************************
+ * 文件名  ：ANO_Drv_BKP.c
+ * 描述      ：后备寄存器，用于掉电数据保护，VBAT供电
+ ************************************************************************************************/
 #include "include.h"
 #include "ano_drv_bkp.h"
 
@@ -8,6 +12,8 @@ void Bkp_Init(void)
     RCC->APB1ENR|=1<<28;     //使能电源时钟     
     RCC->APB1ENR|=1<<27;     //使能BKP时钟 
 }
+
+// 写数据
 void Write_Bkp(u8 reg,u16 data)
 { 
 		PWR->CR|=1<<8;           //取消写保护
@@ -46,7 +52,7 @@ void Write_Bkp(u8 reg,u16 data)
 		}
 }
 	 
-	 
+// 读数据
 u16 Read_Bkp(u8 reg)
 {
 		u16 data;

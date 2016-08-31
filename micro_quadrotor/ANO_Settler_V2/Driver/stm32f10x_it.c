@@ -3,11 +3,11 @@
 #include "ANO_Drv_Uart.h"
 #include "bsp_SysTick.h"
 
-void USART1_IRQHandler(void)  //串口中断函数
+void USART1_IRQHandler(void)  //串口1中断函数
 {
 	Uart1_IRQ();
 }
-void USART3_IRQHandler(void)  //串口中断函数
+void USART3_IRQHandler(void)  //串口3中断函数
 {
 	ANO_UART3_IRQ();
 }
