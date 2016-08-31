@@ -32,6 +32,7 @@ int main(void)
 
 	//初始化ADC采样
 	ADC1_Init();
+	
 	//摇杆值初始化
 	ANO_Stick_Init();
 	
